@@ -29,4 +29,17 @@ describe("test infrastructure", () => {
       "chrome-extension://test-extension-id/icons/icon-48.png",
     );
   });
+
+  it("provides OAuth redirect URL through identity.getRedirectURL", () => {
+    const chromeMock = createChromeMock();
+
+    chromeMock.identity.getRedirectURL.mockReturnValue(
+      "https://test-extension-id.chromiumapp.org/",
+    );
+
+    expect(chromeMock.identity.getRedirectURL()).toBe(
+      "https://test-extension-id.chromiumapp.org/",
+    );
+    expect(chromeMock.identity.getRedirectURL).toHaveBeenCalledOnce();
+  });
 });
