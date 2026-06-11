@@ -12,6 +12,9 @@ describe("background entrypoint", () => {
     const defineBackground = vi.fn((callback: () => void) => callback);
     vi.stubGlobal("defineBackground", defineBackground);
     vi.stubGlobal("browser", browser);
+  it("registers a background handler with WXT", async () => {
+    const defineBackground = vi.fn((fn: () => void) => fn);
+    vi.stubGlobal("defineBackground", defineBackground);
 
     await import("../../entrypoints/background");
 
@@ -40,5 +43,26 @@ describe("background entrypoint", () => {
     });
 
     consoleSpy.mockRestore();
+  it("reads runtime id from the browser API when the handler runs", async () => {
+    const defineBackground = vi.fn((fn: () => void) => fn);
+    vi.stubGlobal("defineBackground", defineBackground);
+    vi.stubGlobal("browser", {
+      runtime: { id: "test-extension-id" },
+    });
+
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    await import("../../entrypoints/background");
+
+    const [[backgroundHandler]] = defineBackground.mock.calls as [
+      [() => void],
+    ];
+    backgroundHandler();
+
+    expect(logSpy).toHaveBeenCalledWith("Hello background!", {
+      id: "test-extension-id",
+    });
+
+    logSpy.mockRestore();
   });
 });
