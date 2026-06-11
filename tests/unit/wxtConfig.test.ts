@@ -14,4 +14,19 @@ describe("wxt.config", () => {
   it("configures Edge as the primary development browser", () => {
     expect(wxtConfig.runner?.binaries?.chrome).toContain("msedge.exe");
   });
+
+  it("does not request store-risky broad permissions in manifest", () => {
+    const manifest = wxtConfig.manifest as
+      | { permissions?: string[]; host_permissions?: string[] }
+      | undefined;
+    const permissions = manifest?.permissions ?? [];
+    const hostPermissions = manifest?.host_permissions ?? [];
+
+    expect(permissions).not.toContain("tabs");
+    expect(permissions).not.toContain("activeTab");
+    expect(permissions).not.toContain("history");
+    expect(permissions).not.toContain("bookmarks");
+    expect(hostPermissions).not.toContain("<all_urls>");
+    expect(hostPermissions).not.toContain("*://*/*");
+  });
 });

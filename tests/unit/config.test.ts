@@ -21,4 +21,12 @@ describe("test infrastructure", () => {
     expect(chromeMock.identity.launchWebAuthFlow).toBeDefined();
     expect(chromeMock.runtime.id).toBe("test-extension-id");
   });
+
+  it("resolves extension asset URLs through runtime.getURL", async () => {
+    const browser = await import("webextension-polyfill");
+
+    expect(browser.default.runtime.getURL("/icons/icon-48.png")).toBe(
+      "chrome-extension://test-extension-id/icons/icon-48.png",
+    );
+  });
 });
