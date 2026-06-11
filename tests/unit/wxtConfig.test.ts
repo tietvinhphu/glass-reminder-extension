@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import wxtConfig from "../../wxt.config";
+import { isOverlyBroadMatchPattern } from "../utils/matchPatterns";
 
 describe("wxt.config", () => {
   it("sets the extension manifest identity", () => {
@@ -26,7 +27,8 @@ describe("wxt.config", () => {
     expect(permissions).not.toContain("activeTab");
     expect(permissions).not.toContain("history");
     expect(permissions).not.toContain("bookmarks");
-    expect(hostPermissions).not.toContain("<all_urls>");
-    expect(hostPermissions).not.toContain("*://*/*");
+    for (const pattern of [...permissions, ...hostPermissions]) {
+      expect(isOverlyBroadMatchPattern(pattern)).toBe(false);
+    }
   });
 });

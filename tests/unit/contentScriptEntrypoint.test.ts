@@ -34,4 +34,30 @@ describe("content script entrypoint", () => {
 
     expect(matches.length).toBeGreaterThan(0);
   });
+
+  it("passes a defensive copy of match patterns so WXT cannot mutate the shared constant", async () => {
+    const defineContentScript = vi.fn((config: unknown) => config);
+    vi.stubGlobal("defineContentScript", defineContentScript);
+
+    await import("../../entrypoints/content");
+
+    const [{ matches }] = defineContentScript.mock.calls[0] as [
+      { matches: string[] },
+    ];
+
+    matches.push("*://attacker.example/*");
+
+    expect(GOOGLE_CONTENT_SCRIPT_MATCHES).toEqual(["*://*.google.com/*"]);
+  });
+
+  it("runs main without throwing when injected into a page", async () => {
+    const defineContentScript = vi.fn((config: unknown) => config);
+    vi.stubGlobal("defineContentScript", defineContentScript);
+
+    await import("../../entrypoints/content");
+
+    const [{ main }] = defineContentScript.mock.calls[0] as [{ main: () => void }];
+
+    expect(() => main()).not.toThrow();
+  });
 });
