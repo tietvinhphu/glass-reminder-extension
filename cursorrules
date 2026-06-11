@@ -1,0 +1,88 @@
+# Glass Reminder Extension — Cursor AI Rules
+# Đọc file này mỗi khi nhận task. KHÔNG bỏ qua.
+
+## 📌 MANDATORY: ĐỌC TRƯỚC KHI LÀM BẤT KỲ TASK NÀO
+
+Trước khi viết bất kỳ dòng code nào, AI PHẢI:
+1. Đọc `INSTRUCTIONS.md` — code standards, security rules, UI rules
+2. Đọc `files/EXTENSION_SPEC.md` — kiến trúc, data schema, tech stack
+3. Xác nhận task thuộc Phase nào trong Roadmap
+4. Hỏi lại nếu task mâu thuẫn với spec
+
+## 🔴🟢 TDD WORKFLOW — BẮT BUỘC
+
+Mọi feature PHẢI theo thứ tự:
+
+```
+BƯỚC 1 — 🔴 RED (viết test thất bại trước)
+  → Tạo file test trong tests/unit/ hoặc tests/components/
+  → Chạy: npm test → phải thấy ĐỎ (fail)
+  → KHÔNG viết implementation code ở bước này
+
+BƯỚC 2 — 🟢 GREEN (viết code tối thiểu để pass)
+  → Viết code trong src/ đúng đủ để test pass
+  → Chạy: npm test → phải thấy XANH (pass)
+  → Chưa optimize, chưa refactor
+
+BƯỚC 3 — 🔵 REFACTOR (clean code)
+  → Refactor code, giữ nguyên tests xanh
+  → Chạy: npm run lint + npm run type-check
+  → Commit khi tất cả pass
+```
+
+**Không bao giờ skip Bước 1.** Nếu không có test, không có code.
+
+## 🌿 BRANCH CONVENTION
+
+```
+feat/phase1-project-setup
+feat/phase1-google-auth
+feat/phase1-calendar-grid
+feat/phase1-event-crud
+feat/phase1-notifications
+feat/phase2-animations
+feat/phase2-options-page
+```
+
+Mỗi branch = 1 feature nhỏ. Không gộp nhiều feature vào 1 branch.
+
+## 🔒 SECURITY — KHÔNG BAO GIỜ VI PHẠM
+
+- Tokens ONLY trong `chrome.storage.local` với AES-GCM encrypt
+- Không dùng `chrome.*` trực tiếp — LUÔN qua `webextension-polyfill`
+- Không `innerHTML` với data từ ngoài — dùng React JSX
+- Không hardcode credentials — dùng `import.meta.env.VITE_*`
+- Không `console.log` tokens hay personal data
+
+## 📐 CODE STANDARDS
+
+- TypeScript strict — no `any`, no type assertions without guard
+- Named exports only — không default export anonymous
+- Import order: React → third-party → internal (@/) → relative (./)
+- File naming: Components PascalCase, hooks/utils camelCase
+- Spacing: 8px grid system
+
+## 🎨 UI RULES
+
+- Popup: fixed 380px wide, max 600px tall
+- Glass blur: max 20px — không vượt quá 30px
+- Animation: 150-400ms, chỉ transform/opacity
+- Icons: Lucide React — không dùng emoji
+- Colors: từ CSS variables — không hardcode hex
+
+## 📦 STORAGE RULES
+
+- Batch writes — không write từng key trong loop
+- Tokens → `chrome.storage.local` (encrypted)
+- Events/prefs → `chrome.storage.sync` (max 100KB total)
+
+## ✅ TRƯỚC KHI COMMIT
+
+```bash
+npm test          # Tất cả tests xanh
+npm run lint      # Zero warnings
+npm run type-check # Zero errors
+npm audit         # No critical vulnerabilities
+```
+
+Nếu bất kỳ lệnh nào fail → FIX trước khi commit.
