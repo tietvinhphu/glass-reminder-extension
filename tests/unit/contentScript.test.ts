@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { GOOGLE_CONTENT_SCRIPT_MATCHES } from "@/src/shared/constants/contentScript";
-import { isValidManifestMatchPattern } from "../utils/matchPatterns";
+import {
+  isOverlyBroadMatchPattern,
+  isValidManifestMatchPattern,
+} from "../utils/matchPatterns";
 
 describe("content script scope", () => {
   it("limits injection to Google domains only", () => {
@@ -19,6 +22,12 @@ describe("content script scope", () => {
   it("uses valid MV3 match pattern syntax", () => {
     for (const pattern of GOOGLE_CONTENT_SCRIPT_MATCHES) {
       expect(isValidManifestMatchPattern(pattern)).toBe(true);
+    }
+  });
+
+  it("does not use store-risky overly broad match patterns", () => {
+    for (const pattern of GOOGLE_CONTENT_SCRIPT_MATCHES) {
+      expect(isOverlyBroadMatchPattern(pattern)).toBe(false);
     }
   });
 });

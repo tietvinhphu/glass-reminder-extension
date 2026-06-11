@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import wxtConfig from "../../wxt.config";
+import {
+  isHttpsOnlyHostPermission,
+  isOverlyBroadMatchPattern,
+  isValidManifestMatchPattern,
+} from "../utils/matchPatterns";
 
 describe("wxt.config", () => {
   it("sets the extension manifest identity", () => {
@@ -28,5 +33,18 @@ describe("wxt.config", () => {
     expect(permissions).not.toContain("bookmarks");
     expect(hostPermissions).not.toContain("<all_urls>");
     expect(hostPermissions).not.toContain("*://*/*");
+  });
+
+  it("keeps configured host permissions HTTPS-only and syntactically valid", () => {
+    const manifest = wxtConfig.manifest as
+      | { host_permissions?: string[] }
+      | undefined;
+    const hostPermissions = manifest?.host_permissions ?? [];
+
+    for (const permission of hostPermissions) {
+      expect(isHttpsOnlyHostPermission(permission)).toBe(true);
+      expect(isValidManifestMatchPattern(permission)).toBe(true);
+      expect(isOverlyBroadMatchPattern(permission)).toBe(false);
+    }
   });
 });

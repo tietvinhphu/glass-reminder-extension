@@ -6,3 +6,8 @@ export const isValidManifestMatchPattern = (pattern: string): boolean =>
 
 export const isHttpsOnlyHostPermission = (pattern: string): boolean =>
   pattern.startsWith("https://");
+
+export const isOverlyBroadMatchPattern = (pattern: string): boolean =>
+  pattern === "<all_urls>" ||
+  pattern === "*://*/*" ||
+  pattern === "*://*";
