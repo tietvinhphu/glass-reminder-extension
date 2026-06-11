@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { FORBIDDEN_MANIFEST_PERMISSIONS } from "@/src/shared/constants/manifest";
 import wxtConfig from "../../wxt.config";
+import { isOverlyBroadMatchPattern } from "../utils/matchPatterns";
 import { isHttpsOnlyHostPermission } from "../utils/matchPatterns";
 
 describe("wxt.config", () => {
@@ -24,6 +25,12 @@ describe("wxt.config", () => {
     const permissions = manifest?.permissions ?? [];
     const hostPermissions = manifest?.host_permissions ?? [];
 
+    expect(permissions).not.toContain("tabs");
+    expect(permissions).not.toContain("activeTab");
+    expect(permissions).not.toContain("history");
+    expect(permissions).not.toContain("bookmarks");
+    for (const pattern of [...permissions, ...hostPermissions]) {
+      expect(isOverlyBroadMatchPattern(pattern)).toBe(false);
     for (const forbidden of FORBIDDEN_MANIFEST_PERMISSIONS) {
       expect(permissions).not.toContain(forbidden);
     }
