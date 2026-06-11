@@ -1,2 +1,3 @@
-# glass-reminder-extension
-Glass Calendar &amp; Smart Reminder Extension for Microsoft Edge
+# WXT + React
+
+This template should help get you started developing with React in WXT.
