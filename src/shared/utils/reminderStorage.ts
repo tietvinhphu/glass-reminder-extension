@@ -24,6 +24,21 @@ export const addReminder = async (data: ReminderFormData): Promise<Reminder> => 
   return newReminder;
 };
 
+/** Cập nhật reminder theo id — trả null nếu không tìm thấy */
+export const updateReminder = async (
+  id: string,
+  updates: Partial<ReminderFormData>,
+): Promise<Reminder | null> => {
+  const reminders = await getReminders();
+  const index = reminders.findIndex((r) => r.id === id);
+  if (index === -1) return null;
+
+  const updated: Reminder = { ...reminders[index], ...updates };
+  reminders[index] = updated;
+  await browser.storage.local.set({ [STORAGE_KEY]: reminders });
+  return updated;
+};
+
 /** Xóa reminder theo id */
 export const deleteReminder = async (id: string): Promise<void> => {
   const reminders = await getReminders();
