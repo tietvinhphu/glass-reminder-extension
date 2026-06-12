@@ -3,6 +3,7 @@ import { create } from "zustand";
 
 import { AUTH_MESSAGE_TYPE } from "@/src/shared/types/authMessages";
 import type { AuthResponse } from "@/src/shared/types/authMessages";
+import { isExpiringSoon } from "@/src/shared/utils/auth";
 import { getToken } from "@/src/shared/utils/tokenStorage";
 
 /** State và actions của auth trong popup */
@@ -56,11 +57,14 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     try {
       const token = await getToken();
-      const isLoggedIn = token !== null;
+      // Token hết hạn và không còn refresh token → coi như chưa đăng nhập
+      const isLoggedIn =
+        token !== null &&
+        !(isExpiringSoon(token.expiresAt, 0) && !token.refreshToken);
 
       set({
         isLoggedIn,
-        user: token?.email ? { email: token.email } : null,
+        user: isLoggedIn && token?.email ? { email: token.email } : null,
         isLoading: false,
       });
     } catch {
@@ -107,9 +111,10 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: null,
       });
     } catch (err) {
-      // Popup có thể đóng khi OAuth mở tab — token vẫn được lưu ở background
+      // Popup có thể đóng khi OAuth mở tab — token mới vẫn được lưu ở background
+      // Chỉ recover khi token còn hạn — tránh báo đăng nhập thành công với session cũ đã hết hạn
       const storedToken = await getToken().catch(() => null);
-      if (storedToken) {
+      if (storedToken && !isExpiringSoon(storedToken.expiresAt, 0)) {
         set({
           isLoggedIn: true,
           user: storedToken.email

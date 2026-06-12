@@ -44,6 +44,20 @@ const extractAuthorizationCode = (redirectUrl: string): string => {
 };
 
 /**
+ * Gộp token mới từ Google với token cũ trong storage
+ * Google thường KHÔNG trả refresh_token khi user đăng nhập lại — phải giữ bản cũ
+ * Nếu ghi đè bằng chuỗi rỗng, access token hết hạn sẽ không refresh được
+ */
+export const mergePreservedTokenFields = (
+  newToken: GoogleAuthToken,
+  existing: GoogleAuthToken | null,
+): GoogleAuthToken => ({
+  ...newToken,
+  refreshToken: newToken.refreshToken || existing?.refreshToken || "",
+  email: newToken.email ?? existing?.email,
+});
+
+/**
  * Đổi authorization code lấy access + refresh token qua PKCE
  */
 const exchangeCodeForToken = async (
@@ -136,7 +150,9 @@ export const launchGoogleOAuth = async (): Promise<GoogleAuthToken> => {
   }
 
   const code = extractAuthorizationCode(redirectUrl);
-  const token = await exchangeCodeForToken(code, codeVerifier, redirectUri);
+  const existing = await getToken();
+  const exchanged = await exchangeCodeForToken(code, codeVerifier, redirectUri);
+  const token = mergePreservedTokenFields(exchanged, existing);
 
   await storeToken(token);
   return token;
