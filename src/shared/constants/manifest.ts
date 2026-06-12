@@ -7,9 +7,11 @@ export const REQUIRED_MANIFEST_PERMISSIONS = [
   "offscreen",
 ] as const;
 
-/** Host permissions for Google Calendar API access. */
+/** Host permissions cho Google Calendar API và OAuth token exchange */
 export const REQUIRED_HOST_PERMISSIONS = [
   "https://www.googleapis.com/*",
+  // PKCE đổi code qua fetch — subdomain khác www, cần quyền riêng
+  "https://oauth2.googleapis.com/*",
 ] as const;
 
 /** Permissions that must never appear in the manifest. */

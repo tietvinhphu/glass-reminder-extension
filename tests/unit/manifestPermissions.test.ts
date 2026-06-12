@@ -27,9 +27,10 @@ describe("manifest permission contract", () => {
     }
   });
 
-  it("scopes API access to Google Calendar over HTTPS only", () => {
+  it("scopes API access to Google Calendar and OAuth token endpoint over HTTPS only", () => {
     expect(REQUIRED_HOST_PERMISSIONS).toEqual([
       "https://www.googleapis.com/*",
+      "https://oauth2.googleapis.com/*",
     ]);
 
     for (const permission of REQUIRED_HOST_PERMISSIONS) {

@@ -1,3 +1,6 @@
+import { registerAuthMessageHandler } from "@/src/background/authMessageHandler";
+
 export default defineBackground(() => {
-  console.log('Hello background!', { id: browser.runtime.id });
+  // OAuth chạy ở background — popup đóng khi mất focus sẽ không hủy flow
+  registerAuthMessageHandler();
 });

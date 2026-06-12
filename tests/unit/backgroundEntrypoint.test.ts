@@ -1,11 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import browser from "webextension-polyfill";
+const registerAuthMessageHandler = vi.fn();
+
+vi.mock("@/src/background/authMessageHandler", () => ({
+  registerAuthMessageHandler,
+}));
 
 describe("background entrypoint", () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.unstubAllGlobals();
+    vi.clearAllMocks();
+    registerAuthMessageHandler.mockReset();
   });
 
   it("registers a background handler with WXT", async () => {
@@ -18,12 +23,9 @@ describe("background entrypoint", () => {
     expect(defineBackground).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  it("reads runtime id from the browser API when the handler runs", async () => {
+  it("registers auth message handler when background starts", async () => {
     const defineBackground = vi.fn((fn: () => void) => fn);
     vi.stubGlobal("defineBackground", defineBackground);
-    vi.stubGlobal("browser", browser);
-
-    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     await import("../../entrypoints/background");
 
@@ -32,10 +34,6 @@ describe("background entrypoint", () => {
     ];
     backgroundHandler();
 
-    expect(logSpy).toHaveBeenCalledWith("Hello background!", {
-      id: "test-extension-id",
-    });
-
-    logSpy.mockRestore();
+    expect(registerAuthMessageHandler).toHaveBeenCalledOnce();
   });
 });
