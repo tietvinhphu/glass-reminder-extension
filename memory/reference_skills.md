@@ -7,9 +7,19 @@ metadata:
 
 Skills được lưu trong `.agents/skills/` (committed vào GitHub, không cần cài lại sau mỗi lần xóa máy):
 
-- `find-skills` — vercel-labs/skills: tìm kiếm skills trong ecosystem
-- `google-calendar` — odyssey4me/agent-skills: Google Calendar API v3 patterns (1.1K installs)
-- `vitest-testing` — secondsky/claude-skills: Vitest testing patterns (460 installs)
+**Ecosystem skills (skills.sh):**
+- `find-skills` — vercel-labs/skills: tìm kiếm skills mới
+- `google-calendar` — odyssey4me/agent-skills: Google Calendar API v3 patterns
+- `vitest-testing` — secondsky/claude-skills: Vitest testing patterns
+- `glassmorphism` — ainergiz/design-inspirations: glassmorphism UI patterns (Low Risk)
 
-**Nếu cần cài thêm skill:** `npx skills find <query> --yes` (chạy từ C:\ path, không phải UNC path)
-**Browse:** https://skills.sh/
+**obra/superpowers workflow skills:**
+- `systematic-debugging` — debug có quy trình trước khi fix
+- `test-driven-development` — TDD workflow (Red→Green→Refactor)
+- `verification-before-completion` — verify thực sự trước khi claim done
+- `writing-plans` — lên plan cho multi-step tasks
+- `using-superpowers` — meta-skill: chọn đúng skill cho task
+- `brainstorming` — design trước khi implement
+- `requesting-code-review` — trước khi merge PR
+
+**Nếu cần cài thêm:** `npx skills find <query> --yes` (chạy từ C:\ path, không phải UNC path)

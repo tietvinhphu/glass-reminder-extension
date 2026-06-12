@@ -14,6 +14,26 @@
 
 ---
 
+## 🧠 SKILL SELECTION — Tự động chọn skill trước khi làm task
+
+Trước khi bắt đầu BẤT KỲ task nào, kiểm tra skills có sẵn trong `.agents/skills/` và chọn skill phù hợp:
+
+| Loại task | Skill nên dùng |
+|---|---|
+| Có bug / lỗi runtime | `systematic-debugging` |
+| Implement feature mới | `test-driven-development` + `brainstorming` |
+| Lên plan cho checkpoint | `writing-plans` |
+| Sắp claim "done" / tạo PR | `verification-before-completion` + `requesting-code-review` |
+| Thiết kế UI glassmorphism | `glassmorphism` |
+| Làm việc với Google Calendar API | `google-calendar` |
+| Viết / sửa Vitest tests | `vitest-testing` |
+| Tìm skill mới cho task | `find-skills` |
+| Không biết dùng skill nào | `using-superpowers` |
+
+**Quy tắc:** Đọc SKILL.md của skill được chọn trước khi bắt đầu implement.
+
+---
+
 ## 🎯 Project
 
 Browser extension cho **Microsoft Edge** (primary), Chrome, Firefox.  
