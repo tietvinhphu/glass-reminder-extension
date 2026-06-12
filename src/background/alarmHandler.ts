@@ -1,6 +1,11 @@
 import browser from "webextension-polyfill";
 
-import { getReminderById, deleteReminder, addReminder } from "@/src/shared/utils/reminderStorage";
+import {
+  getReminders,
+  getReminderById,
+  deleteReminder,
+  updateReminder,
+} from "@/src/shared/utils/reminderStorage";
 
 /**
  * Đăng ký alarm cho một reminder — gọi khi tạo reminder mới
@@ -34,26 +39,34 @@ const handleAlarm = async (alarm: browser.Alarms.Alarm): Promise<void> => {
     priority: 2,
   });
 
-  // Xử lý repeat: tạo alarm tiếp theo rồi xóa bản ghi cũ
+  // Repeat: cập nhật datetime in-place (giữ id) rồi schedule alarm tiếp theo
   if (reminder.repeat === "daily") {
     const nextDatetime = reminder.datetime + 24 * 60 * 60 * 1000;
-    await deleteReminder(reminder.id);
-    const next = await addReminder({ ...reminder, datetime: nextDatetime });
-    scheduleAlarm(next.id, nextDatetime);
+    const updated = await updateReminder(reminder.id, { datetime: nextDatetime });
+    if (updated) scheduleAlarm(updated.id, nextDatetime);
   } else if (reminder.repeat === "weekly") {
     const nextDatetime = reminder.datetime + 7 * 24 * 60 * 60 * 1000;
-    await deleteReminder(reminder.id);
-    const next = await addReminder({ ...reminder, datetime: nextDatetime });
-    scheduleAlarm(next.id, nextDatetime);
+    const updated = await updateReminder(reminder.id, { datetime: nextDatetime });
+    if (updated) scheduleAlarm(updated.id, nextDatetime);
   } else {
     // Không repeat → xóa khỏi storage sau khi bắn
     await deleteReminder(reminder.id);
   }
 };
 
+/**
+ * Khôi phục alarm sau khi extension reload/update
+ * Chrome xóa toàn bộ alarm khi extension unload — reminder vẫn còn trong storage
+ */
+export const restoreReminderAlarms = async (): Promise<void> => {
+  const reminders = await getReminders();
+  for (const reminder of reminders) {
+    scheduleAlarm(reminder.id, reminder.datetime);
+  }
+};
+
 /** Đăng ký listener cho tất cả alarm của extension */
 export const registerAlarmHandler = (): void => {
-  browser.alarms.onAlarm.addListener((alarm) => {
-    void handleAlarm(alarm);
-  });
+  // Trả Promise để service worker không bị terminate giữa các thao tác async
+  browser.alarms.onAlarm.addListener((alarm) => handleAlarm(alarm));
 };
