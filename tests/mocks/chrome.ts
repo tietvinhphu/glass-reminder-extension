@@ -29,6 +29,10 @@ export interface ChromeMock {
   };
   runtime: {
     id: string;
+    onMessage?: {
+      addListener: Mock;
+    };
+    sendMessage?: Mock;
   };
 }
 
@@ -71,5 +75,9 @@ export const createChromeMock = (): ChromeMock => ({
   },
   runtime: {
     id: "test-extension-id",
+    onMessage: {
+      addListener: vi.fn(),
+    },
+    sendMessage: vi.fn(),
   },
 });

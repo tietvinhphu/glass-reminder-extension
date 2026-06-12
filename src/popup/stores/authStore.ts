@@ -1,7 +1,8 @@
+import browser from "webextension-polyfill";
 import { create } from "zustand";
 
-import { launchGoogleOAuth, logoutGoogle } from "@/src/background/auth";
-import type { AuthUser } from "@/src/shared/types/auth";
+import { AUTH_MESSAGE_TYPE } from "@/src/shared/types/authMessages";
+import type { AuthResponse } from "@/src/shared/types/authMessages";
 import { getToken } from "@/src/shared/utils/tokenStorage";
 
 /** State và actions của auth trong popup */
@@ -9,18 +10,36 @@ interface AuthState {
   /** true khi đã có token hợp lệ trong storage */
   isLoggedIn: boolean;
   /** Thông tin user hiển thị trên header — null khi chưa login */
-  user: AuthUser | null;
+  user: { email: string } | null;
   /** true khi đang chạy OAuth hoặc đọc storage */
   isLoading: boolean;
   /** Thông báo lỗi login — null khi không có lỗi */
   error: string | null;
   /** Khởi tạo trạng thái từ chrome.storage.local khi mở popup */
   initialize: () => Promise<void>;
-  /** Bắt đầu OAuth flow qua background service */
+  /** Gửi message sang background để chạy OAuth (popup có thể đóng giữa chừng) */
   login: () => Promise<void>;
-  /** Xóa token và reset state */
+  /** Xóa token qua background và reset state */
   logout: () => Promise<void>;
 }
+
+/**
+ * Gửi message auth sang background service worker
+ * Không gọi trực tiếp launchWebAuthFlow từ popup — context popup bị destroy khi OAuth mở tab mới
+ */
+const sendAuthMessage = async (
+  type: typeof AUTH_MESSAGE_TYPE.LOGIN | typeof AUTH_MESSAGE_TYPE.LOGOUT,
+): Promise<AuthResponse> => {
+  const response = (await browser.runtime.sendMessage({ type })) as
+    | AuthResponse
+    | undefined;
+
+  if (!response) {
+    throw new Error("Background không phản hồi auth message");
+  }
+
+  return response;
+};
 
 /**
  * Zustand store quản lý auth state toàn popup
@@ -58,7 +77,28 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const token = await launchGoogleOAuth();
+      const response = await sendAuthMessage(AUTH_MESSAGE_TYPE.LOGIN);
+
+      if (!response.success) {
+        set({
+          isLoggedIn: false,
+          user: null,
+          isLoading: false,
+          error: response.error,
+        });
+        return;
+      }
+
+      const token = response.token;
+      if (!token) {
+        set({
+          isLoggedIn: false,
+          user: null,
+          isLoading: false,
+          error: "Đăng nhập thất bại — không nhận được token",
+        });
+        return;
+      }
 
       set({
         isLoggedIn: true,
@@ -67,6 +107,20 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: null,
       });
     } catch (err) {
+      // Popup có thể đóng khi OAuth mở tab — token vẫn được lưu ở background
+      const storedToken = await getToken().catch(() => null);
+      if (storedToken) {
+        set({
+          isLoggedIn: true,
+          user: storedToken.email
+            ? { email: storedToken.email }
+            : { email: "Google User" },
+          isLoading: false,
+          error: null,
+        });
+        return;
+      }
+
       const message =
         err instanceof Error ? err.message : "Đăng nhập Google thất bại";
 
@@ -83,7 +137,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await logoutGoogle();
+      const response = await sendAuthMessage(AUTH_MESSAGE_TYPE.LOGOUT);
+
+      if (!response.success) {
+        set({
+          isLoading: false,
+          error: response.error,
+        });
+        return;
+      }
+
       set({
         isLoggedIn: false,
         user: null,

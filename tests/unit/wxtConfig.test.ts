@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { FORBIDDEN_MANIFEST_PERMISSIONS } from "@/src/shared/constants/manifest";
+import {
+  FORBIDDEN_MANIFEST_PERMISSIONS,
+  REQUIRED_HOST_PERMISSIONS,
+  REQUIRED_MANIFEST_PERMISSIONS,
+} from "@/src/shared/constants/manifest";
 import wxtConfig from "../../wxt.config";
 import { isOverlyBroadMatchPattern } from "../utils/matchPatterns";
 import { isHttpsOnlyHostPermission } from "../utils/matchPatterns";
@@ -12,6 +16,15 @@ describe("wxt.config", () => {
       description: "Glass Calendar & Smart Reminder Extension",
       version: "1.0.0",
     });
+  });
+
+  it("declares OAuth and storage permissions required by the extension spec", () => {
+    const manifest = wxtConfig.manifest as
+      | { permissions?: string[]; host_permissions?: string[] }
+      | undefined;
+
+    expect(manifest?.permissions).toEqual([...REQUIRED_MANIFEST_PERMISSIONS]);
+    expect(manifest?.host_permissions).toEqual([...REQUIRED_HOST_PERMISSIONS]);
   });
 
   it("configures Edge as the primary development browser", () => {
