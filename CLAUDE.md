@@ -3,9 +3,14 @@
 
 ## ⚡ ĐỌC NGAY KHI BẮT ĐẦU SESSION
 
-Đọc 2 file này trước khi nhận bất kỳ task nào:
+Đọc các file này trước khi nhận bất kỳ task nào:
+- `memory/MEMORY.md` + tất cả files trong `memory/` — **bộ nhớ xuyên session**, đọc đầu tiên
 - `INSTRUCTIONS.md` — coding standards, security rules, workflow
 - `files/EXTENSION_SPEC.md` — full technical spec
+
+> **Môi trường đặc biệt:** Laptop domain cty xóa dữ liệu local khi tắt máy.
+> Memory được lưu trong repo GitHub tại `memory/`. Đây là source of truth duy nhất.
+> Sau mỗi task, hook tự động commit & push `memory/` + `.agents/` lên GitHub.
 
 ---
 
