@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/sync-memory.sh",
+            "timeout": 30,
+            "statusMessage": "Syncing memory to GitHub..."
+          }
+        ]
+      }
+    ]
+  }
+}

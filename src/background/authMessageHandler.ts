@@ -50,7 +50,7 @@ export const registerAuthMessageHandler = (): void => {
   const listener = (
     message: unknown,
     _sender: unknown,
-    sendResponse: (response: AuthResponse) => void,
+    sendResponse: () => void,
   ): true | undefined => {
     if (
       typeof message !== "object" ||

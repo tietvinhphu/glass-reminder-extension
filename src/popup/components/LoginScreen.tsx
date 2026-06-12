@@ -22,9 +22,9 @@ export const LoginScreen = () => {
         <button
           type="button"
           className="glass-button login-button"
-          onClick={() => void login()}
+          onClick={() => login()}
           disabled={isLoading}
-          aria-busy={isLoading}
+          aria-busy={isLoading ? "true" : "false"}
         >
           <LogIn size={18} aria-hidden="true" />
           <span>{isLoading ? "Đang đăng nhập..." : "Sign in with Google"}</span>

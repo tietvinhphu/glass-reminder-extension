@@ -14,18 +14,18 @@ const KEY_DERIVATION_SALT = "glass-reminder-extension-token-salt";
  * Dùng cho PKCE code_challenge và payload mã hóa
  */
 const toBase64Url = (bytes: Uint8Array): string => {
-  const base64 = btoa(String.fromCharCode(...bytes));
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const base64 = btoa(String.fromCodePoint(...bytes));
+  return base64.replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
 };
 
 /**
  * Giải mã base64url về Uint8Array
  */
 const fromBase64Url = (value: string): Uint8Array => {
-  const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+  const base64 = value.replaceAll('-', "+").replaceAll('_', "/");
   const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
   const binary = atob(padded);
-  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return Uint8Array.from(binary, (char) => char.codePointAt(0) ?? 0);
 };
 
 /**
@@ -99,7 +99,7 @@ export const encryptToken = async (plainText: string): Promise<string> => {
   crypto.getRandomValues(iv);
 
   const cipherBuffer = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
+    { name: "AES-GCM", iv: iv },
     key,
     new TextEncoder().encode(plainText),
   );
@@ -130,9 +130,9 @@ export const decryptToken = async (encrypted: string): Promise<string> => {
   const cipherBytes = fromBase64Url(cipherEncoded);
 
   const plainBuffer = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: iv as BufferSource },
+    { name: "AES-GCM", iv: new Uint8Array(iv) },
     key,
-    cipherBytes as BufferSource,
+    new Uint8Array(cipherBytes),
   );
 
   return new TextDecoder().decode(plainBuffer);

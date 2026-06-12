@@ -23,9 +23,9 @@ export const storeToken = async (token: GoogleAuthToken): Promise<void> => {
  * Trả về null nếu chưa đăng nhập hoặc không có dữ liệu
  */
 export const getToken = async (): Promise<GoogleAuthToken | null> => {
-  const stored = (await browser.storage.local.get(
+  const stored = await browser.storage.local.get(
     GOOGLE_TOKEN_STORAGE_KEY,
-  )) as Record<string, unknown>;
+  );
   const encrypted = stored[GOOGLE_TOKEN_STORAGE_KEY];
 
   if (typeof encrypted !== "string" || encrypted.length === 0) {
