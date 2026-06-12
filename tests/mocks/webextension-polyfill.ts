@@ -1,12 +1,20 @@
 import { vi } from "vitest";
 
-import { createChromeMock } from "./chrome";
+import { getChromeMock, type ChromeMock } from "./chrome";
+
+/**
+ * Mock browser API dùng chung cho mọi test
+ * Singleton — spy storage.local trên cùng instance dù resetModules
+ */
+export const chromeMock: ChromeMock = getChromeMock();
 
 const browser = {
-  ...createChromeMock(),
+  ...chromeMock,
   runtime: {
     id: "test-extension-id",
-    getURL: vi.fn((path: string) => `chrome-extension://test-extension-id${path}`),
+    getURL: vi.fn(
+      (path: string) => `chrome-extension://test-extension-id${path}`,
+    ),
   },
 };
 
