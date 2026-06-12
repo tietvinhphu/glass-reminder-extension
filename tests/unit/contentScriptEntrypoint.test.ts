@@ -50,15 +50,6 @@ describe("content script entrypoint", () => {
     expect(GOOGLE_CONTENT_SCRIPT_MATCHES).toEqual(["*://*.google.com/*"]);
   });
 
-  it("runs main without throwing when injected into a page", async () => {
-    const defineContentScript = vi.fn((config: unknown) => config);
-    vi.stubGlobal("defineContentScript", defineContentScript);
-
-    await import("../../entrypoints/content");
-
-    const [{ main }] = defineContentScript.mock.calls[0] as [{ main: () => void }];
-
-    expect(() => main()).not.toThrow();
   it("registers a main handler for page injection", async () => {
     const defineContentScript = vi.fn((config: unknown) => config);
     vi.stubGlobal("defineContentScript", defineContentScript);
@@ -71,8 +62,7 @@ describe("content script entrypoint", () => {
     ];
 
     expect(main).toEqual(expect.any(Function));
-
-    main();
+    expect(() => main()).not.toThrow();
     expect(logSpy).toHaveBeenCalledWith("Hello content.");
 
     logSpy.mockRestore();

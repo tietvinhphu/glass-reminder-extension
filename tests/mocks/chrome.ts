@@ -32,12 +32,22 @@ export interface ChromeMock {
   };
 }
 
+let sharedChromeMock: ChromeMock | null = null;
+
+/** Trả về singleton mock — tránh resetModules tạo instance mới */
+export const getChromeMock = (): ChromeMock => {
+  if (!sharedChromeMock) {
+    sharedChromeMock = createChromeMock();
+  }
+  return sharedChromeMock;
+};
+
 export const createChromeMock = (): ChromeMock => ({
   storage: {
     local: {
-      get: vi.fn(),
-      set: vi.fn(),
-      remove: vi.fn(),
+      get: vi.fn().mockResolvedValue({}),
+      set: vi.fn().mockResolvedValue(undefined),
+      remove: vi.fn().mockResolvedValue(undefined),
     },
     sync: {
       get: vi.fn(),

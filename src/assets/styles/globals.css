@@ -1,0 +1,99 @@
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-blur: blur(20px);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  --color-bg: #0a0a1a;
+  --color-primary: #6366f1;
+  --color-text: #f1f5f9;
+  --color-text-muted: rgba(241, 245, 249, 0.6);
+  --color-danger: #ef4444;
+  --popup-width: 380px;
+  --radius-lg: 16px;
+  --transition-fast: 150ms ease;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.glass-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.glass-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-screen {
+  width: var(--popup-width);
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.login-card {
+  width: 100%;
+  padding: 24px;
+  text-align: center;
+}
+
+.login-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.login-subtitle {
+  margin: 0 0 24px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.login-error {
+  margin: 16px 0 0;
+  color: var(--color-danger);
+  font-size: 12px;
+}
+
+.auth-gate-loading {
+  width: var(--popup-width);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  font-size: 13px;
+}

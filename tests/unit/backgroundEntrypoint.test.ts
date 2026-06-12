@@ -8,10 +8,6 @@ describe("background entrypoint", () => {
     vi.unstubAllGlobals();
   });
 
-  it("registers the service worker with WXT defineBackground", async () => {
-    const defineBackground = vi.fn((callback: () => void) => callback);
-    vi.stubGlobal("defineBackground", defineBackground);
-    vi.stubGlobal("browser", browser);
   it("registers a background handler with WXT", async () => {
     const defineBackground = vi.fn((fn: () => void) => fn);
     vi.stubGlobal("defineBackground", defineBackground);
@@ -22,33 +18,10 @@ describe("background entrypoint", () => {
     expect(defineBackground).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  it("reads the extension runtime id from the browser polyfill on startup", async () => {
-    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    let backgroundCallback: (() => void) | undefined;
-
-    const defineBackground = vi.fn((callback: () => void) => {
-      backgroundCallback = callback;
-      return callback;
-    });
-    vi.stubGlobal("defineBackground", defineBackground);
-    vi.stubGlobal("browser", browser);
-
-    await import("../../entrypoints/background");
-
-    expect(backgroundCallback).toBeTypeOf("function");
-    backgroundCallback!();
-
-    expect(consoleSpy).toHaveBeenCalledWith("Hello background!", {
-      id: "test-extension-id",
-    });
-
-    consoleSpy.mockRestore();
   it("reads runtime id from the browser API when the handler runs", async () => {
     const defineBackground = vi.fn((fn: () => void) => fn);
     vi.stubGlobal("defineBackground", defineBackground);
-    vi.stubGlobal("browser", {
-      runtime: { id: "test-extension-id" },
-    });
+    vi.stubGlobal("browser", browser);
 
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 

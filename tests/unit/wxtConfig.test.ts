@@ -31,6 +31,8 @@ describe("wxt.config", () => {
     expect(permissions).not.toContain("bookmarks");
     for (const pattern of [...permissions, ...hostPermissions]) {
       expect(isOverlyBroadMatchPattern(pattern)).toBe(false);
+    }
+
     for (const forbidden of FORBIDDEN_MANIFEST_PERMISSIONS) {
       expect(permissions).not.toContain(forbidden);
     }

@@ -2,6 +2,11 @@ import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  define: {
+    "import.meta.env.VITE_GOOGLE_CLIENT_ID": JSON.stringify(
+      "test-client-id.apps.googleusercontent.com",
+    ),
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
