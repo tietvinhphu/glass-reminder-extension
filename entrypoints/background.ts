@@ -1,6 +1,6 @@
-import { registerAuthMessageHandler } from "@/src/background/authMessageHandler";
+import { registerAlarmHandler } from "@/src/background/alarmHandler";
 
 export default defineBackground(() => {
-  // OAuth chạy ở background — popup đóng khi mất focus sẽ không hủy flow
-  registerAuthMessageHandler();
+  // Lắng nghe alarm để bắn notification nhắc nhở đúng giờ
+  registerAlarmHandler();
 });
