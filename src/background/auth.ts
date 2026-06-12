@@ -136,7 +136,13 @@ export const launchGoogleOAuth = async (): Promise<GoogleAuthToken> => {
   }
 
   const code = extractAuthorizationCode(redirectUrl);
+  const existingToken = await getToken();
   const token = await exchangeCodeForToken(code, codeVerifier, redirectUri);
+
+  // Google có thể không trả refresh_token khi user re-authorize — tránh ghi đè bằng chuỗi rỗng
+  if (!token.refreshToken && existingToken?.refreshToken) {
+    token.refreshToken = existingToken.refreshToken;
+  }
 
   await storeToken(token);
   return token;
