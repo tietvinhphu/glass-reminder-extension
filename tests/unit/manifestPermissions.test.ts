@@ -5,19 +5,13 @@ import {
   REQUIRED_HOST_PERMISSIONS,
   REQUIRED_MANIFEST_PERMISSIONS,
 } from "@/src/shared/constants/manifest";
-import {
-  isHttpsOnlyHostPermission,
-  isValidManifestMatchPattern,
-} from "../utils/matchPatterns";
 
 describe("manifest permission contract", () => {
-  it("lists only least-privilege permissions from the extension spec", () => {
+  it("lists only least-privilege permissions for local reminder mode", () => {
     expect(REQUIRED_MANIFEST_PERMISSIONS).toEqual([
       "storage",
       "alarms",
       "notifications",
-      "identity",
-      "offscreen",
     ]);
   });
 
@@ -27,22 +21,12 @@ describe("manifest permission contract", () => {
     }
   });
 
-  it("scopes API access to Google Calendar and OAuth token endpoint over HTTPS only", () => {
-    expect(REQUIRED_HOST_PERMISSIONS).toEqual([
-      "https://www.googleapis.com/*",
-      "https://oauth2.googleapis.com/*",
-    ]);
-
-    for (const permission of REQUIRED_HOST_PERMISSIONS) {
-      expect(isHttpsOnlyHostPermission(permission)).toBe(true);
-      expect(permission).not.toBe("<all_urls>");
-      expect(permission).not.toBe("*://*/*");
-    }
+  it("does not request host permissions in local mode", () => {
+    expect(REQUIRED_HOST_PERMISSIONS).toEqual([]);
   });
 
-  it("uses valid MV3 host permission syntax for API endpoints", () => {
-    for (const permission of REQUIRED_HOST_PERMISSIONS) {
-      expect(isValidManifestMatchPattern(permission)).toBe(true);
-    }
+  it("does not include OAuth-only permissions after local mode migration", () => {
+    expect(REQUIRED_MANIFEST_PERMISSIONS).not.toContain("identity");
+    expect(REQUIRED_MANIFEST_PERMISSIONS).not.toContain("offscreen");
   });
 });

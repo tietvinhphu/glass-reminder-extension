@@ -1,6 +1,14 @@
 import browser from "webextension-polyfill";
 
-import { getReminderById, deleteReminder, addReminder } from "@/src/shared/utils/reminderStorage";
+import {
+  getReminders,
+  getReminderById,
+  deleteReminder,
+  updateReminder,
+} from "@/src/shared/utils/reminderStorage";
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const MS_PER_WEEK = 7 * MS_PER_DAY;
 
 /**
  * Đăng ký alarm cho một reminder — gọi khi tạo reminder mới
@@ -18,8 +26,52 @@ export const cancelAlarm = (reminderId: string): void => {
 };
 
 /**
+ * Tính thời điểm kích hoạt tiếp theo cho reminder lặp đã quá hạn
+ * Trả null nếu reminder one-shot đã quá hạn (cần xóa)
+ */
+const resolveNextSchedule = (
+  datetime: number,
+  repeat: "none" | "daily" | "weekly",
+  now: number,
+): number | null => {
+  if (datetime > now) return datetime;
+  if (repeat === "none") return null;
+
+  const interval = repeat === "daily" ? MS_PER_DAY : MS_PER_WEEK;
+  let next = datetime;
+  while (next <= now) {
+    next += interval;
+  }
+  return next;
+};
+
+/**
+ * Khôi phục alarm từ storage — gọi khi extension khởi động hoặc sau update
+ * Chrome xóa alarm khi extension reload/update nhưng giữ nguyên storage
+ */
+export const restoreAlarms = async (): Promise<void> => {
+  const reminders = await getReminders();
+  const now = Date.now();
+
+  for (const reminder of reminders) {
+    const scheduleAt = resolveNextSchedule(reminder.datetime, reminder.repeat, now);
+
+    if (scheduleAt === null) {
+      await deleteReminder(reminder.id);
+      continue;
+    }
+
+    if (scheduleAt !== reminder.datetime) {
+      await updateReminder(reminder.id, { datetime: scheduleAt });
+    }
+
+    scheduleAlarm(reminder.id, scheduleAt);
+  }
+};
+
+/**
  * Xử lý khi alarm bắn: hiện notification, xử lý repeat
- * Nếu repeat daily/weekly → tạo alarm mới cho lần sau
+ * Nếu repeat daily/weekly → cập nhật datetime và tạo alarm mới (giữ nguyên id)
  */
 const handleAlarm = async (alarm: browser.Alarms.Alarm): Promise<void> => {
   const reminder = await getReminderById(alarm.name);
@@ -34,17 +86,15 @@ const handleAlarm = async (alarm: browser.Alarms.Alarm): Promise<void> => {
     priority: 2,
   });
 
-  // Xử lý repeat: tạo alarm tiếp theo rồi xóa bản ghi cũ
+  // Xử lý repeat: cập nhật datetime rồi lên lịch lần sau (một lần ghi storage)
   if (reminder.repeat === "daily") {
-    const nextDatetime = reminder.datetime + 24 * 60 * 60 * 1000;
-    await deleteReminder(reminder.id);
-    const next = await addReminder({ ...reminder, datetime: nextDatetime });
-    scheduleAlarm(next.id, nextDatetime);
+    const nextDatetime = reminder.datetime + MS_PER_DAY;
+    await updateReminder(reminder.id, { datetime: nextDatetime });
+    scheduleAlarm(reminder.id, nextDatetime);
   } else if (reminder.repeat === "weekly") {
-    const nextDatetime = reminder.datetime + 7 * 24 * 60 * 60 * 1000;
-    await deleteReminder(reminder.id);
-    const next = await addReminder({ ...reminder, datetime: nextDatetime });
-    scheduleAlarm(next.id, nextDatetime);
+    const nextDatetime = reminder.datetime + MS_PER_WEEK;
+    await updateReminder(reminder.id, { datetime: nextDatetime });
+    scheduleAlarm(reminder.id, nextDatetime);
   } else {
     // Không repeat → xóa khỏi storage sau khi bắn
     await deleteReminder(reminder.id);

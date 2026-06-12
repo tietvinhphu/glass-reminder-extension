@@ -1,16 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const registerAuthMessageHandler = vi.fn();
+const registerAlarmHandler = vi.fn();
+const restoreAlarms = vi.fn().mockResolvedValue(undefined);
 
-vi.mock("@/src/background/authMessageHandler", () => ({
-  registerAuthMessageHandler,
+vi.mock("@/src/background/alarmHandler", () => ({
+  registerAlarmHandler,
+  restoreAlarms,
 }));
 
 describe("background entrypoint", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
-    registerAuthMessageHandler.mockReset();
+    registerAlarmHandler.mockReset();
+    restoreAlarms.mockReset();
+    restoreAlarms.mockResolvedValue(undefined);
   });
 
   it("registers a background handler with WXT", async () => {
@@ -23,10 +27,11 @@ describe("background entrypoint", () => {
     expect(defineBackground).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  it("registers auth message handler when background starts", async () => {
+  it("registers alarm handler and restores alarms when background starts", async () => {
     const defineBackground = vi.fn((fn: () => void) => fn);
     vi.stubGlobal("defineBackground", defineBackground);
 
+    const browser = (await import("webextension-polyfill")).default;
     await import("../../entrypoints/background");
 
     const [[backgroundHandler]] = defineBackground.mock.calls as [
@@ -34,6 +39,8 @@ describe("background entrypoint", () => {
     ];
     backgroundHandler();
 
-    expect(registerAuthMessageHandler).toHaveBeenCalledOnce();
+    expect(registerAlarmHandler).toHaveBeenCalledOnce();
+    expect(restoreAlarms).toHaveBeenCalledOnce();
+    expect(browser.runtime.onInstalled?.addListener).toHaveBeenCalledOnce();
   });
 });
