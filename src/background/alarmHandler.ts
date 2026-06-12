@@ -1,6 +1,11 @@
 import browser from "webextension-polyfill";
 
-import { getReminderById, deleteReminder, addReminder } from "@/src/shared/utils/reminderStorage";
+import {
+  getReminderById,
+  getReminders,
+  deleteReminder,
+  updateReminder,
+} from "@/src/shared/utils/reminderStorage";
 
 /**
  * Đăng ký alarm cho một reminder — gọi khi tạo reminder mới
@@ -34,16 +39,14 @@ const handleAlarm = async (alarm: browser.Alarms.Alarm): Promise<void> => {
     priority: 2,
   });
 
-  // Xử lý repeat: tạo alarm tiếp theo rồi xóa bản ghi cũ
+  // Xử lý repeat: cập nhật datetime tại chỗ để tránh mất dữ liệu giữa delete/add
   if (reminder.repeat === "daily") {
     const nextDatetime = reminder.datetime + 24 * 60 * 60 * 1000;
-    await deleteReminder(reminder.id);
-    const next = await addReminder({ ...reminder, datetime: nextDatetime });
+    const next = await updateReminder(reminder.id, { datetime: nextDatetime });
     scheduleAlarm(next.id, nextDatetime);
   } else if (reminder.repeat === "weekly") {
     const nextDatetime = reminder.datetime + 7 * 24 * 60 * 60 * 1000;
-    await deleteReminder(reminder.id);
-    const next = await addReminder({ ...reminder, datetime: nextDatetime });
+    const next = await updateReminder(reminder.id, { datetime: nextDatetime });
     scheduleAlarm(next.id, nextDatetime);
   } else {
     // Không repeat → xóa khỏi storage sau khi bắn
@@ -51,9 +54,21 @@ const handleAlarm = async (alarm: browser.Alarms.Alarm): Promise<void> => {
   }
 };
 
-/** Đăng ký listener cho tất cả alarm của extension */
+/**
+ * Khôi phục alarm từ storage khi service worker khởi động lại.
+ * Chrome không đảm bảo alarm sống sót sau reload/update extension.
+ */
+export const syncAlarmsFromStorage = async (): Promise<void> => {
+  const reminders = await getReminders();
+  for (const reminder of reminders) {
+    scheduleAlarm(reminder.id, reminder.datetime);
+  }
+};
+
+/** Đăng ký listener và đồng bộ alarm từ storage khi background start */
 export const registerAlarmHandler = (): void => {
   browser.alarms.onAlarm.addListener((alarm) => {
     void handleAlarm(alarm);
   });
+  void syncAlarmsFromStorage();
 };

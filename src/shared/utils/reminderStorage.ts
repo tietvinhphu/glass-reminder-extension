@@ -24,6 +24,24 @@ export const addReminder = async (data: ReminderFormData): Promise<Reminder> => 
   return newReminder;
 };
 
+/** Cập nhật reminder theo id — giữ nguyên id/createdAt khi chỉ đổi lịch lặp */
+export const updateReminder = async (
+  id: string,
+  updates: Partial<ReminderFormData>,
+): Promise<Reminder> => {
+  const reminders = await getReminders();
+  const index = reminders.findIndex((r) => r.id === id);
+  if (index === -1) {
+    throw new Error(`Reminder not found: ${id}`);
+  }
+
+  const updated: Reminder = { ...reminders[index], ...updates };
+  const next = [...reminders];
+  next[index] = updated;
+  await browser.storage.local.set({ [STORAGE_KEY]: next });
+  return updated;
+};
+
 /** Xóa reminder theo id */
 export const deleteReminder = async (id: string): Promise<void> => {
   const reminders = await getReminders();
