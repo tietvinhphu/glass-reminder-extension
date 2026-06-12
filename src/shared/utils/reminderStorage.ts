@@ -31,6 +31,22 @@ export const deleteReminder = async (id: string): Promise<void> => {
   await browser.storage.local.set({ [STORAGE_KEY]: filtered });
 };
 
+/** Cập nhật reminder theo id — dùng cho repeat alarm (giữ nguyên id, một lần ghi storage) */
+export const updateReminder = async (
+  id: string,
+  updates: Partial<Pick<Reminder, "datetime">>,
+): Promise<Reminder | null> => {
+  const reminders = await getReminders();
+  const index = reminders.findIndex((r) => r.id === id);
+  if (index === -1) return null;
+
+  const updated: Reminder = { ...reminders[index], ...updates };
+  const next = [...reminders];
+  next[index] = updated;
+  await browser.storage.local.set({ [STORAGE_KEY]: next });
+  return updated;
+};
+
 /** Lấy một reminder theo id — trả null nếu không tìm thấy */
 export const getReminderById = async (id: string): Promise<Reminder | null> => {
   const reminders = await getReminders();

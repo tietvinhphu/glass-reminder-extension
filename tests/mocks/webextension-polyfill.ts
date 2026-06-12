@@ -15,6 +15,9 @@ const browser = {
     getURL: vi.fn(
       (path: string) => `chrome-extension://test-extension-id${path}`,
     ),
+    onInstalled: {
+      addListener: vi.fn(),
+    },
     onMessage: {
       addListener: vi.fn(),
     },
