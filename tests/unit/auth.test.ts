@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { mergePreservedTokenFields } from "@/src/background/auth";
 import { buildGoogleAuthURL, isExpiringSoon } from "@/src/shared/utils/auth";
 import { generatePKCE } from "@/src/shared/utils/crypto";
+import type { GoogleAuthToken } from "@/src/shared/types/auth";
 
 /**
  * Chuyển Uint8Array sang base64url (không padding) — dùng để verify PKCE challenge
@@ -62,5 +64,44 @@ describe("auth utils", () => {
 
     // Token hết hạn sau 600 giây — lớn hơn buffer → chưa cần refresh
     expect(isExpiringSoon(nowSeconds + 600, bufferSeconds)).toBe(false);
+  });
+
+  it("mergePreservedTokenFields() giữ refresh_token cũ khi Google không trả mới", () => {
+    const existing: GoogleAuthToken = {
+      accessToken: "old-access",
+      refreshToken: "keep-this-refresh-token",
+      expiresAt: Math.floor(Date.now() / 1000) - 60,
+      email: "user@example.com",
+    };
+
+    const exchanged: GoogleAuthToken = {
+      accessToken: "new-access",
+      refreshToken: "",
+      expiresAt: Math.floor(Date.now() / 1000) + 3600,
+    };
+
+    const merged = mergePreservedTokenFields(exchanged, existing);
+
+    expect(merged.accessToken).toBe("new-access");
+    expect(merged.refreshToken).toBe("keep-this-refresh-token");
+    expect(merged.email).toBe("user@example.com");
+  });
+
+  it("mergePreservedTokenFields() ưu tiên refresh_token mới nếu Google trả về", () => {
+    const existing: GoogleAuthToken = {
+      accessToken: "old-access",
+      refreshToken: "old-refresh",
+      expiresAt: Math.floor(Date.now() / 1000) + 3600,
+    };
+
+    const exchanged: GoogleAuthToken = {
+      accessToken: "new-access",
+      refreshToken: "new-refresh",
+      expiresAt: Math.floor(Date.now() / 1000) + 3600,
+    };
+
+    const merged = mergePreservedTokenFields(exchanged, existing);
+
+    expect(merged.refreshToken).toBe("new-refresh");
   });
 });
