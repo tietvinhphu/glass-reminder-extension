@@ -16,8 +16,6 @@ describe("manifest permission contract", () => {
       "storage",
       "alarms",
       "notifications",
-      "identity",
-      "offscreen",
     ]);
   });
 
@@ -27,21 +25,15 @@ describe("manifest permission contract", () => {
     }
   });
 
-  it("scopes API access to Google Calendar and OAuth token endpoint over HTTPS only", () => {
-    expect(REQUIRED_HOST_PERMISSIONS).toEqual([
-      "https://www.googleapis.com/*",
-      "https://oauth2.googleapis.com/*",
-    ]);
+  it("does not request host permissions in local-only mode", () => {
+    expect(REQUIRED_HOST_PERMISSIONS).toEqual([]);
+  });
 
+  it("uses valid MV3 host permission syntax when host permissions exist", () => {
     for (const permission of REQUIRED_HOST_PERMISSIONS) {
       expect(isHttpsOnlyHostPermission(permission)).toBe(true);
       expect(permission).not.toBe("<all_urls>");
       expect(permission).not.toBe("*://*/*");
-    }
-  });
-
-  it("uses valid MV3 host permission syntax for API endpoints", () => {
-    for (const permission of REQUIRED_HOST_PERMISSIONS) {
       expect(isValidManifestMatchPattern(permission)).toBe(true);
     }
   });
