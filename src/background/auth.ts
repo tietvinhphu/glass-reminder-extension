@@ -150,7 +150,8 @@ export const launchGoogleOAuth = async (): Promise<GoogleAuthToken> => {
   }
 
   const code = extractAuthorizationCode(redirectUrl);
-  const existing = await getToken();
+  // Token cũ corrupt/không giải mã được → coi như null, không chặn OAuth mới
+  const existing = await getToken().catch(() => null);
   const exchanged = await exchangeCodeForToken(code, codeVerifier, redirectUri);
   const token = mergePreservedTokenFields(exchanged, existing);
 

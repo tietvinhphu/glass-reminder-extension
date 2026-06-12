@@ -55,26 +55,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialize: async () => {
     set({ isLoading: true, error: null });
 
-    try {
-      const token = await getToken();
-      // Token hết hạn và không còn refresh token → coi như chưa đăng nhập
-      const isLoggedIn =
-        token !== null &&
-        !(isExpiringSoon(token.expiresAt, 0) && !token.refreshToken);
+    // Token corrupt/không giải mã được → coi như chưa đăng nhập, vẫn cho login lại
+    const token = await getToken().catch(() => null);
+    // Token hết hạn và không còn refresh token → coi như chưa đăng nhập
+    const isLoggedIn =
+      token !== null &&
+      !(isExpiringSoon(token.expiresAt, 0) && !token.refreshToken);
 
-      set({
-        isLoggedIn,
-        user: isLoggedIn && token?.email ? { email: token.email } : null,
-        isLoading: false,
-      });
-    } catch {
-      set({
-        isLoggedIn: false,
-        user: null,
-        isLoading: false,
-        error: "Không thể đọc trạng thái đăng nhập",
-      });
-    }
+    set({
+      isLoggedIn,
+      user: isLoggedIn && token?.email ? { email: token.email } : null,
+      isLoading: false,
+    });
   },
 
   login: async () => {
