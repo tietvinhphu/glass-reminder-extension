@@ -1,0 +1,57 @@
+# Glass Reminder Extension — Cursor Agent Rules
+# Version 2.0 | ĐỌC FILE NÀY TRƯỚC KHI LÀM BẤT KỲ TASK NÀO
+
+## 📌 MANDATORY — ĐỌC TRƯỚC
+
+Trước khi viết code, PHẢI:
+1. Đọc INSTRUCTIONS.md
+2. Đọc files/EXTENSION_SPEC.md
+3. Xác nhận task thuộc Checkpoint nào
+
+## 🎯 Vai trò của Cursor Agent
+
+- Nhận prompt từ Claude/owner
+- Viết code + test + GIẢI THÍCH từng dòng cho owner học
+- KHÔNG tự tạo PR — owner quyết định
+- Owner review tại local VSCode trước khi push main
+
+## 💬 QUY TẮC CODE BẮT BUỘC
+
+### Comment — LUÔN LUÔN CÓ
+Mọi function và block logic PHẢI có comment tiếng Việt giải thích mục đích.
+Không có comment = code chưa xong.
+
+### TypeScript
+- No any, explicit types
+- Named export only
+- Import order: React → third-party → internal → relative
+
+### Security
+- Token → chrome.storage.local + AES-GCM encrypt
+- Không chrome.* trực tiếp → dùng webextension-polyfill
+- Không innerHTML với external data
+- Không hardcode credentials → import.meta.env.VITE_*
+- Không log token/email/personal data
+
+## 🔴🟢 TDD WORKFLOW
+
+```
+🔴 Viết test TRƯỚC → chạy → FAIL
+🟢 Implement → chạy → PASS
+🔵 Refactor + comment → PASS
+```
+
+## 🎨 UI RULES
+
+- Popup: 380px wide, max 600px tall
+- Glass blur: max 20px
+- Animation: 150-400ms, chỉ transform/opacity
+- Icons: Lucide React
+- Colors: CSS variables only
+
+## ✅ DONE KHI
+
+- npm test → xanh hết
+- npm run type-check → pass
+- Tất cả code có comment giải thích
+- Không có security violation

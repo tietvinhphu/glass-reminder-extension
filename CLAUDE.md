@@ -1,9 +1,10 @@
 # Glass Reminder Extension — Claude Code Instructions
+> Version 2.0 | 2026-06-12
 
-## ⚡ TỰ ĐỌC KHI BẮT ĐẦU SESSION
+## ⚡ ĐỌC NGAY KHI BẮT ĐẦU SESSION
 
-Claude Code phải đọc 2 file này trước khi nhận bất kỳ task nào:
-- `INSTRUCTIONS.md` — coding standards, security rules
+Đọc 2 file này trước khi nhận bất kỳ task nào:
+- `INSTRUCTIONS.md` — coding standards, security rules, workflow
 - `files/EXTENSION_SPEC.md` — full technical spec
 
 ---
@@ -13,55 +14,68 @@ Claude Code phải đọc 2 file này trước khi nhận bất kỳ task nào:
 Browser extension cho **Microsoft Edge** (primary), Chrome, Firefox.  
 Stack: WXT + React 18 + TypeScript + Tailwind CSS v4  
 Auth: Google OAuth 2.0 PKCE | Calendar: Google Calendar API v3  
-Storage: chrome.storage.sync (events) + chrome.storage.local (tokens encrypted)
+Secrets: VITE_GOOGLE_CLIENT_ID lưu trong Cursor Cloud Secrets (Environment Variable)
+
+---
+
+## 🗺️ Vai trò trong team
+
+```
+CLAUDE       → Điều phối, lên plan, dạy concept, viết prompt
+CURSOR AGENT → Nhận prompt, viết code + test, giải thích từng dòng
+OWNER        → Học, review, copy code về local VSCode kiểm tra
+LOCAL VSCODE → Quality gate cuối: ESLint, SonarLint, Vitest, Coverage
+GITHUB MAIN  → Source of truth sau khi owner confirm
+AUTOMATIONS  → Background: vulnerabilities, bugs, CI failures
+```
+
+**CURSOR AGENT không tự tạo PR** — owner quyết định push lên main.
+
+---
+
+## 💬 Quy tắc bắt buộc khi viết code
+
+### 1. Comment giải thích — LUÔN CÓ
+
+Mọi function, block logic phức tạp PHẢI có comment tiếng Việt giải thích:
+- Mục đích làm gì
+- Tại sao làm vậy (nếu không hiển nhiên)
+- Param/return có ý nghĩa gì
+
+```typescript
+// ✅ Đúng — có comment đầy đủ
+// Kiểm tra token có sắp hết hạn không
+// bufferSeconds: số giây buffer trước khi hết hạn để refresh sớm
+const isExpiringSoon = (expiresAt: number, bufferSeconds: number): boolean => {
+  // So sánh thời điểm hết hạn với thời điểm hiện tại + buffer
+  return expiresAt - Date.now() / 1000 < bufferSeconds;
+};
+
+// ❌ Sai — không có comment
+const isExpiringSoon = (expiresAt: number, bufferSeconds: number): boolean => {
+  return expiresAt - Date.now() / 1000 < bufferSeconds;
+};
+```
+
+### 2. TypeScript strict — no any
+
+### 3. Dùng webextension-polyfill, không chrome.* trực tiếp
+
+### 4. Token chỉ lưu chrome.storage.local với AES-GCM encrypt
+
+### 5. Không log sensitive data
 
 ---
 
 ## 🔴🟢🔵 TDD — RED GREEN REFACTOR
 
-**Quy trình bắt buộc cho mọi feature:**
-
-### 🔴 Red — Viết test thất bại trước
-```bash
-# Tạo test file
-touch tests/unit/[feature].test.ts
-# hoặc
-touch tests/components/[Component].test.tsx
-
-# Viết test mô tả behavior mong muốn
-# Chạy để confirm ĐỎ
-npm test -- --reporter=verbose
+```
+🔴 RED    → Viết test → chạy → FAIL (đúng rồi)
+🟢 GREEN  → Implement → chạy → PASS
+🔵 REFACTOR → Clean + comment → tests vẫn PASS
 ```
 
-### 🟢 Green — Viết code tối thiểu để pass
-```bash
-# Implement feature trong src/
-# Chạy để confirm XANH
-npm test
-```
-
-### 🔵 Refactor — Clean code, giữ test xanh
-```bash
-npm test && npm run lint && npm run type-check
-```
-
-**Test structure:**
-```
-tests/
-├── unit/                    ← Pure functions, utils, hooks
-│   ├── crypto.test.ts
-│   ├── dateHelpers.test.ts
-│   └── storage.test.ts
-├── components/              ← React components với @testing-library
-│   ├── EventCard.test.tsx
-│   ├── CalendarGrid.test.tsx
-│   └── EventModal.test.tsx
-└── mocks/                   ← Browser API mocks
-    ├── chrome.ts            ← Mock chrome.storage, alarms, notifications
-    └── webextension-polyfill.ts
-```
-
-**Mock browser APIs trong test:**
+Mock browser APIs:
 ```typescript
 // tests/mocks/chrome.ts
 global.chrome = {
@@ -77,74 +91,35 @@ global.chrome = {
 
 ---
 
-## 🌿 Branch Strategy — GitHub Flow
-
-```
-main (protected)
-  └── feat/phase1-project-setup    ← setup WXT, ESLint, Vitest
-  └── feat/phase1-google-auth      ← OAuth PKCE flow + token storage
-  └── feat/phase1-calendar-grid    ← UI: MonthGrid + EventList
-  └── feat/phase1-event-crud       ← Add/Edit/Delete events
-  └── feat/phase1-notifications    ← Alarms + notifications
-  └── feat/phase2-animations       ← Framer Motion
-  └── feat/phase2-options-page     ← Settings UI
-```
-
-**Flow mỗi feature:**
-1. `git checkout -b feat/[phase]-[feature]`
-2. 🔴 Viết failing tests
-3. 🟢 Implement để pass tests
-4. 🔵 Refactor + lint + type-check
-5. `git push origin feat/[phase]-[feature]`
-6. Chờ owner review → merge vào main
-
----
-
-## 🔒 Security Checklist (check mỗi task)
-
-- [ ] Tokens chỉ trong `chrome.storage.local` với AES-GCM encrypt
-- [ ] Dùng `webextension-polyfill`, không `chrome.*` trực tiếp
-- [ ] Không `innerHTML` với external data
-- [ ] Không hardcode client ID, secrets
-- [ ] Không log tokens, email, personal data
-
----
-
-## 📋 Task Prompt Template
-
-Khi nhận task từ owner, output phải có format:
+## 📋 Output format khi nhận task
 
 ```
 ## Task: [Tên feature]
-## Branch: feat/[phase]-[feature]
-## Phase: [1/2/3]
+## Checkpoint: [1/2/3...]
 
-### 🔴 Tests cần viết (TRƯỚC)
-- [ ] test case 1
+### 🔴 Tests cần viết TRƯỚC
+- [ ] test case 1 — giải thích test này kiểm tra gì
 - [ ] test case 2
 
 ### 🟢 Implementation plan
-- [ ] file cần tạo/sửa
+- [ ] file cần tạo — làm gì
 - [ ] logic cần implement
 
-### ✅ Definition of Done
-- [ ] All tests pass (npm test)
-- [ ] No lint errors (npm run lint)  
-- [ ] No type errors (npm run type-check)
-- [ ] Edge load unpacked test pass
+### ✅ Done khi
+- [ ] npm test → xanh
+- [ ] npm run type-check → pass
+- [ ] Extension load Edge → tính năng hoạt động
 ```
 
 ---
 
-## 🚀 Quick Commands
+## 🚀 Commands
 
 ```bash
 npm run dev           # Edge dev (hot reload)
-npm run dev:firefox   # Firefox dev
-npm test              # Vitest (watch mode)
-npm test -- --run     # Vitest (single run, CI mode)
-npm run lint          # ESLint
+npm test              # Vitest watch mode
+npm test -- --run     # Vitest single run
 npm run type-check    # tsc --noEmit
+npm run lint          # ESLint
 npm run build         # Production build
-npm run zip           # Package for store
 ```

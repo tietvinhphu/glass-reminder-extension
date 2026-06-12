@@ -1,87 +1,148 @@
 # Glass Reminder Extension — Project Instructions
-> Cursor / Claude Code Rules | Solo Founder Project | 2026
+> Version 2.0 | Cập nhật: 2026-06-12 | Solo Founder Project
 
 ---
 
 ## 🎯 Project Context
 
-Đây là browser extension **primary target: Microsoft Edge** (secondary: Chrome, Firefox) cung cấp:
+Browser extension **primary target: Microsoft Edge** (secondary: Chrome, Firefox):
 - Glass calendar UI với glassmorphism design
 - Sync với Google Calendar
 - Smart reminders qua browser notifications
 - Add/Edit/Delete events
 
-**Key fact:** Edge là Chromium-based → cùng MV3 với Chrome → **1 codebase chạy được Edge + Chrome luôn**.
+**Key fact:** Edge là Chromium-based → cùng MV3 với Chrome → 1 codebase chạy cả Edge + Chrome.
 
 **Stack:** WXT + React 18 + TypeScript + Tailwind CSS v4  
 **Auth:** OAuth 2.0 PKCE (Google)  
-**Storage:** chrome.storage.sync (events) + chrome.storage.local (tokens)  
-**Deploy priority:** Microsoft Edge Add-ons Store → Chrome Web Store → Firefox Add-ons
+**Storage:** chrome.storage.sync (events) + chrome.storage.local (tokens encrypted)  
+**Deploy:** Microsoft Edge Add-ons Store → Chrome Web Store → Firefox Add-ons
 
 ---
 
-## 🧠 Code Philosophy
+## 🗺️ Workflow làm việc
 
-### Ưu tiên theo thứ tự:
-1. **Security first** — Extension có quyền truy cập OAuth tokens, calendar data. Không bao giờ trade security for convenience.
-2. **Clean > Clever** — Code phải readable sau 6 tháng. Không viết one-liner khó hiểu.
-3. **Performance** — Popup phải mở trong < 200ms. Không làm nặng main thread.
-4. **Cross-browser** — Chrome và Firefox phải hoạt động như nhau.
-
----
-
-## 📐 Code Standards
-
-### TypeScript
-```typescript
-// ✅ DO: Explicit types, no any
-const fetchEvents = async (calendarId: string): Promise<CalendarEvent[]> => { ... }
-
-// ❌ DON'T: implicit any, type assertions without guard
-const data: any = await fetch(...);
-const event = data as CalendarEvent; // Không có type guard
+```
+CLAUDE (điều phối + lên plan + dạy concept)
+        ↓ viết prompt
+CURSOR CLOUD AGENT
+  - Có Secrets (VITE_GOOGLE_CLIENT_ID) từ Cursor Settings
+  - Có GitHub access
+  - Viết code + test + giải thích từng dòng cho owner
+  - KHÔNG tự tạo PR — owner quyết định
+        ↓ owner học, hiểu, copy code
+LOCAL VSCODE (quality gate cuối cùng)
+  - ESLint + Prettier   → code clean
+  - SonarLint           → security check
+  - Vitest + Coverage   → test xanh
+  - Error Lens          → lỗi inline
+  - Edge DevTools       → debug extension
+        ↓ owner confirm ổn
+GIT PUSH lên main
+        ↓ tự động trigger
+CURSOR CLOUD AUTOMATIONS (background)
+  - Find vulnerabilities
+  - Find critical bugs
+  - Fix CI failures
+  - Scan codebase
+  - Remediate dependencies
 ```
 
-### React Components
+---
+
+## 💬 Quy tắc viết code — BẮT BUỘC
+
+### Comment giải thích — LUÔN LUÔN CÓ
+
 ```typescript
-// ✅ DO: Named export, explicit props interface
+// ✅ BẮT BUỘC: Comment giải thích MỤC ĐÍCH của function/block
+// Hàm này mã hóa token trước khi lưu vào storage
+// Dùng AES-GCM 256-bit — chuẩn mã hóa đối xứng mạnh nhất hiện tại
+const encryptToken = async (plainText: string): Promise<string> => {
+  // Tạo key ngẫu nhiên 256-bit cho mỗi lần mã hóa
+  const key = await crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    false,        // key không thể export ra ngoài — bảo mật hơn
+    ["encrypt", "decrypt"]
+  );
+  // ...
+};
+
+// ❌ KHÔNG được viết code không có comment
+const encryptToken = async (plainText: string): Promise<string> => {
+  const key = await crypto.subtle.generateKey(...);
+};
+```
+
+### TypeScript — Strict, no any
+
+```typescript
+// ✅ Explicit types, rõ ràng
+const fetchEvents = async (calendarId: string): Promise<CalendarEvent[]> => { }
+
+// ❌ Không dùng any, không assertion không có guard
+const data: any = await fetch(...);
+```
+
+### React Components — Named export, rõ props
+
+```typescript
+// ✅ Named export + interface rõ ràng
 interface EventCardProps {
-  event: CalendarEvent;
-  onEdit: (event: CalendarEvent) => void;
-  onDelete: (id: string) => void;
+  event: CalendarEvent;      // Sự kiện cần hiển thị
+  onEdit: (event: CalendarEvent) => void;   // Callback khi user bấm Edit
+  onDelete: (id: string) => void;           // Callback khi user bấm Delete
 }
+export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => { }
 
-export const EventCard = ({ event, onEdit, onDelete }: EventCardProps) => { ... }
-
-// ❌ DON'T: Default export anonymous, props spread
-export default ({ ...props }) => { ... }
+// ❌ Không dùng default export anonymous
+export default ({ ...props }) => { }
 ```
 
 ### File naming
+
 ```
-components/     → PascalCase.tsx     (EventCard.tsx)
-hooks/          → camelCase.ts       (useCalendar.ts)
-utils/          → camelCase.ts       (dateHelpers.ts)
-types/          → camelCase.ts       (event.ts)
-constants/      → SCREAMING_SNAKE hoặc camelCase
+components/  → PascalCase.tsx   (EventCard.tsx)
+hooks/       → camelCase.ts     (useCalendar.ts)
+utils/       → camelCase.ts     (dateHelpers.ts)
+types/       → camelCase.ts     (event.ts)
+tests/       → [tên file].test.ts
 ```
 
-### Import ordering (ESLint enforced)
+### Import ordering
+
 ```typescript
-// 1. React
+// 1. React core
 import { useState, useEffect } from "react";
-
-// 2. Third-party
+// 2. Third-party libs
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { Calendar, Bell } from "lucide-react";
-
-// 3. Internal (absolute)
+// 3. Internal absolute path
 import { useAuth } from "@/hooks/useAuth";
 import { CalendarEvent } from "@/shared/types/event";
-
-// 4. Relative
+// 4. Relative path
 import { GlassCard } from "./ui/GlassCard";
+```
+
+---
+
+## 🔴🟢 TDD — Red Green Refactor
+
+Mọi feature PHẢI theo thứ tự:
+
+```
+🔴 RED    → Viết test mô tả behavior → chạy → thấy FAIL
+🟢 GREEN  → Viết code tối thiểu để pass → chạy → thấy PASS
+🔵 REFACTOR → Clean code + thêm comment → tests vẫn PASS
+```
+
+Test structure:
+```
+tests/
+├── unit/          ← Pure functions, utils, hooks
+├── components/    ← React components với @testing-library
+└── mocks/         ← Mock chrome.storage, alarms, identity
 ```
 
 ---
@@ -89,31 +150,30 @@ import { GlassCard } from "./ui/GlassCard";
 ## 🔒 Security Rules — KHÔNG BAO GIỜ VI PHẠM
 
 ```typescript
-// ❌ NEVER: Store tokens trong chrome.storage.sync
-chrome.storage.sync.set({ accessToken: token }); // NGUY HIỂM — sync lên cloud
+// ❌ KHÔNG lưu token vào storage.sync (sync lên cloud = nguy hiểm)
+chrome.storage.sync.set({ accessToken: token });
 
-// ✅ ALWAYS: Tokens chỉ trong chrome.storage.local, phải encrypt
-import { encryptToken } from "@/shared/utils/crypto";
+// ✅ Token chỉ trong storage.local với AES-GCM encrypt
 const encrypted = await encryptToken(token);
 chrome.storage.local.set({ googleToken: encrypted });
 
-// ❌ NEVER: innerHTML với data từ ngoài
-element.innerHTML = event.description; // XSS risk
+// ❌ KHÔNG dùng innerHTML với data từ ngoài (XSS risk)
+element.innerHTML = event.description;
 
-// ✅ ALWAYS: textContent hoặc React JSX
+// ✅ Dùng React JSX — React tự escape
 <p>{event.description}</p>
 
-// ❌ NEVER: Hardcode credentials
-const CLIENT_ID = "abc123xyz.apps.googleusercontent.com";
+// ❌ KHÔNG hardcode credentials
+const CLIENT_ID = "abc123.apps.googleusercontent.com";
 
-// ✅ ALWAYS: Environment variables
+// ✅ Lấy từ environment variable
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-// ❌ NEVER: Log sensitive data
+// ❌ KHÔNG log sensitive data
 console.log("Token:", accessToken);
 
-// ✅ ALWAYS: Log chỉ metadata
-console.log("Token refreshed, expires in:", expiresIn);
+// ✅ Chỉ log metadata
+console.log("Token refreshed, expires in:", expiresIn, "seconds");
 ```
 
 ---
@@ -121,21 +181,21 @@ console.log("Token refreshed, expires in:", expiresIn);
 ## 🌐 Cross-browser Rules
 
 ```typescript
-// ❌ NEVER: Dùng chrome.* trực tiếp
+// ❌ KHÔNG dùng chrome.* trực tiếp
 chrome.storage.sync.get("events");
 
-// ✅ ALWAYS: Dùng webextension-polyfill
+// ✅ LUÔN dùng webextension-polyfill
 import browser from "webextension-polyfill";
 browser.storage.sync.get("events");
 
-// ❌ NEVER: chrome.offscreen (Chrome only) mà không có fallback
+// ❌ KHÔNG dùng Chrome-only API mà không có fallback
 chrome.offscreen.createDocument(...);
 
-// ✅ ALWAYS: Feature detect trước khi dùng Chrome-only API
+// ✅ Feature detect trước
 if (chrome.offscreen) {
   await chrome.offscreen.createDocument(...);
 } else {
-  // Firefox fallback path
+  // Firefox fallback
   await browser.identity.launchWebAuthFlow(...);
 }
 ```
@@ -144,77 +204,64 @@ if (chrome.offscreen) {
 
 ## 🎨 UI/UX Rules
 
-### Glassmorphism constraints
 ```css
-/* ✅ Glass card standard */
-backdrop-filter: blur(20px);
+/* ✅ Glass card chuẩn */
+backdrop-filter: blur(20px);        /* max 20px — blur > 30px gây lag GPU */
 background: rgba(255, 255, 255, 0.08);
 border: 1px solid rgba(255, 255, 255, 0.15);
 
-/* ❌ Không blur quá mạnh (> 30px) — gây lag trên low-end GPU */
-/* ❌ Không stack nhiều hơn 2 glass layers chồng nhau */
+/* ❌ Không stack > 2 glass layers chồng nhau */
 ```
 
-### Animation rules
 ```
-✅ transition duration: 150-400ms
-✅ Dùng transform, opacity — không animate width/height (trigger layout reflow)
+Animation:
+✅ duration: 150-400ms
+✅ Chỉ animate transform, opacity (không animate width/height)
 ✅ Tôn trọng prefers-reduced-motion
-❌ Không animate cùng lúc > 3 elements
-❌ Không dùng setTimeout cho animation — dùng CSS transitions hoặc Framer Motion
-```
+❌ Không animate > 3 elements cùng lúc
+❌ Không dùng setTimeout cho animation
 
-### Popup sizing
-```
-Width: 380px (fixed, không responsive)
-Height: max 600px (scroll inside nếu cần)
-Padding top: 16px
-Padding sides: 16px
-```
+Popup sizing:
+Width: 380px (fixed)
+Height: max 600px
+Padding: 16px
 
-### Component hierarchy khi code UI
-1. Màu sắc lấy từ CSS variables (không hardcode hex)
-2. Spacing theo 8px grid
-3. Icons: Lucide React (không dùng emoji)
-4. Loading state: skeleton placeholder (không spinner trống)
-5. Error state: message rõ ràng + retry action
-6. Empty state: icon + text hướng dẫn
+Component rules:
+- Màu từ CSS variables, không hardcode hex
+- Spacing theo 8px grid
+- Icons: Lucide React (không dùng emoji)
+- Loading: skeleton placeholder
+- Error: message rõ + retry button
+- Empty: icon + text hướng dẫn
+```
 
 ---
 
 ## 📦 Storage Rules
 
 ```typescript
-// storage.sync limits:
-// - Tổng: 100KB
-// - Per key: 8KB
-// - Max keys: 512
-// - Writes: 1800 operations/hour
+// chrome.storage.sync limits:
+// Tổng: 100KB | Per key: 8KB | Max keys: 512 | Writes: 1800/hour
 
-// ✅ Batch writes để tránh rate limit
+// ✅ Batch writes — 1 lần ghi nhiều key
 await browser.storage.sync.set({
-  events: serializedEvents,
-  preferences: prefs,
-  lastSyncAt: new Date().toISOString()
+  events: serializedEvents,     // Danh sách events đã serialize
+  preferences: prefs,           // Preferences của user
+  lastSyncAt: new Date().toISOString()  // Timestamp sync cuối
 });
 
-// ❌ Không write từng key một trong loop
+// ❌ Không write từng key trong loop — dễ hit rate limit
 for (const event of events) {
-  await browser.storage.sync.set({ [`event_${event.id}`]: event }); // HIT RATE LIMIT
+  await browser.storage.sync.set({ [`event_${event.id}`]: event });
 }
-
-// ✅ Compress nếu cần (events list có thể lớn)
-// Chỉ cache 30 ngày events trong storage.sync
-// Older events fetch on-demand từ Google Calendar API
 ```
 
 ---
 
-## 🔄 API Integration Rules
+## 🔄 API Rules
 
-### Error handling
 ```typescript
-// ✅ Typed error handling với retry logic
+// ✅ Retry logic có type — tự động retry khi lỗi network
 const fetchWithRetry = async <T>(
   fn: () => Promise<T>,
   maxRetries = 3,
@@ -225,20 +272,20 @@ const fetchWithRetry = async <T>(
       return await fn();
     } catch (err) {
       if (i === maxRetries - 1) throw err;
+      // Nếu lỗi auth → refresh token rồi thử lại
       if (isAuthError(err)) { await refreshToken(); continue; }
+      // Nếu rate limit → chờ lâu hơn mỗi lần (exponential backoff)
       if (isRateLimitError(err)) { await sleep(delay * (i + 1)); continue; }
-      throw err; // Unrecoverable error
+      throw err;
     }
   }
 };
-```
 
-### Token refresh
-```typescript
-// ✅ ALWAYS check token expiry trước API call
+// ✅ Luôn check token expiry trước khi gọi API
 const getValidGoogleToken = async (): Promise<string> => {
   const stored = await getStoredToken();
-  if (!stored || isExpiringSoon(stored, 5 * 60)) { // Refresh nếu < 5 phút
+  // Refresh nếu token còn < 5 phút — tránh expired giữa chừng
+  if (!stored || isExpiringSoon(stored, 5 * 60)) {
     return await refreshGoogleToken();
   }
   return decryptToken(stored.encryptedToken);
@@ -247,45 +294,36 @@ const getValidGoogleToken = async (): Promise<string> => {
 
 ---
 
-## 📁 File tham chiếu
+## 📁 Files quan trọng
 
 ```
-📂 files/
-  └── EXTENSION_SPEC.md     ← Technical spec đầy đủ
-📄 INSTRUCTIONS.md          ← File này
-📄 .env.example             ← Template environment variables
-📄 wxt.config.ts            ← WXT config chính
-📄 tailwind.config.ts       ← Tailwind config + design tokens
-```
-
----
-
-## 🚀 Development Commands
-
-```bash
-npm run dev           # Chrome dev mode (hot reload)
-npm run dev:firefox   # Firefox dev mode
-npm run build         # Production build cả 2 browsers
-npm run lint          # ESLint check
-npm run type-check    # TypeScript check (no emit)
-npm run test          # Vitest unit tests
-npm run zip           # Package cho store submission
+.cursorrules              ← Cursor Cloud đọc tự động
+CLAUDE.md                 ← Claude Code CLI đọc tự động
+INSTRUCTIONS.md           ← File này — đọc trước khi làm task
+files/EXTENSION_SPEC.md   ← Technical spec đầy đủ
+files/TDD_WORKFLOW.md     ← Prompt templates cho từng checkpoint
+.cursor/environment.json  ← Config môi trường Cursor Cloud
 ```
 
 ---
 
-## ✅ Pre-commit Checklist
+## ✅ Pre-push Checklist (Local VSCode)
 
-Trước khi commit, tự check:
-- [ ] `npm run lint` pass, không warnings
-- [ ] `npm run type-check` không errors
-- [ ] `npm audit` không critical vulnerabilities  
-- [ ] Không có `console.log` sensitive data
-- [ ] Không có hardcoded credentials
-- [ ] **Edge build hoạt động** (`edge://extensions/` load unpacked test)
-- [ ] Chrome build pass (cùng output với Edge)
-- [ ] Không import `chrome.*` trực tiếp (phải qua polyfill)
+Trước khi `git push origin main`, tự kiểm tra:
+
+```
+□ Vitest sidebar → tất cả tests XANH
+□ Coverage Gutters → không có dòng đỏ quan trọng
+□ Problems panel (Ctrl+Shift+M) → 0 ESLint errors
+□ SonarLint → không có security warning
+□ npm run type-check → pass
+□ npm audit → không có critical
+□ Không có console.log token/email/sensitive data
+□ Không có hardcoded credentials
+□ Tất cả code mới có comment giải thích
+□ Load extension vào Edge → test tính năng vừa làm
+```
 
 ---
 
-*Cập nhật: 2026-06-11 | Solo founder project*
+*Version 2.0 | 2026-06-12*
