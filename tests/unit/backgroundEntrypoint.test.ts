@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const registerAuthMessageHandler = vi.fn();
+const registerAlarmHandler = vi.fn();
 
-vi.mock("@/src/background/authMessageHandler", () => ({
-  registerAuthMessageHandler,
+vi.mock("@/src/background/alarmHandler", () => ({
+  registerAlarmHandler,
 }));
 
 describe("background entrypoint", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
-    registerAuthMessageHandler.mockReset();
+    registerAlarmHandler.mockReset();
   });
 
   it("registers a background handler with WXT", async () => {
@@ -23,7 +23,7 @@ describe("background entrypoint", () => {
     expect(defineBackground).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  it("registers auth message handler when background starts", async () => {
+  it("registers alarm handler when background starts", async () => {
     const defineBackground = vi.fn((fn: () => void) => fn);
     vi.stubGlobal("defineBackground", defineBackground);
 
@@ -34,6 +34,6 @@ describe("background entrypoint", () => {
     ];
     backgroundHandler();
 
-    expect(registerAuthMessageHandler).toHaveBeenCalledOnce();
+    expect(registerAlarmHandler).toHaveBeenCalledOnce();
   });
 });
