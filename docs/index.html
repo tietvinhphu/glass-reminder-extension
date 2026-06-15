@@ -124,6 +124,8 @@
     }
     footer a { color: var(--red); text-decoration: none; margin: 0 8px; }
     footer a:hover { text-decoration: underline; }
+    .container { max-width:960px; margin:0 auto; padding:0 24px; }
+    footer .footer-links { margin-bottom:10px; }
   </style>
 </head>
 <body>
@@ -255,7 +257,7 @@
 </section>
 
 <!-- Privacy -->
-<div style="max-width:960px; margin:0 auto; padding:0 24px;">
+<div class="container">
   <div class="privacy-strip">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     <div>
@@ -269,7 +271,7 @@
 
 <!-- Footer -->
 <footer>
-  <p style="margin-bottom:10px;">
+  <p class="footer-links">
     <a href="privacy-policy.html">Chính sách bảo mật</a>
     <a href="https://github.com/tietvinhphu/glass-reminder-extension" target="_blank" rel="noopener">GitHub</a>
     <a href="mailto:tietvinhphu@gmail.com">Liên hệ</a>
