@@ -78,5 +78,5 @@ If we update this policy, we will update the "Last updated" date above. Continue
 ## Contact
 
 For questions about this privacy policy, contact:  
-**Email:** phucyber91@gmail.com  
+**Email:** tietvinhphu@gmail.com  
 **GitHub:** [github.com/tietvinhphu/glass-reminder-extension](https://github.com/tietvinhphu/glass-reminder-extension)
