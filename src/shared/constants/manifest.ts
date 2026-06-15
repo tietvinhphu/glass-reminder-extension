@@ -3,6 +3,7 @@ export const REQUIRED_MANIFEST_PERMISSIONS = [
   "storage",
   "alarms",
   "notifications",
+  "windows", // cần để mở cửa sổ alarm overlay khi tới giờ sự kiện
 ] as const;
 
 /** Host permissions — hiện không cần (local mode, không gọi API ngoài) */
