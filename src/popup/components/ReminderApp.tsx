@@ -8,6 +8,7 @@ import { getReminders, addReminder, deleteReminder, updateReminder } from "@/src
 import { scheduleAlarm, cancelAlarm } from "@/src/background/alarmHandler";
 import { CreateReminderForm } from "./CreateReminderForm";
 import { ReminderList } from "./ReminderList";
+import { GlassFilter } from "./GlassFilter";
 
 /** App chính của popup — quản lý state reminder và điều phối UI */
 export const ReminderApp = () => {
@@ -77,6 +78,8 @@ export const ReminderApp = () => {
 
   return (
     <div className="reminder-app">
+      {/* SVG filter cho hiệu ứng kính lỏng — ẩn, được CSS tham chiếu qua url(#glass-distortion) */}
+      <GlassFilter />
       <header className="app-header">
         <div className="app-brand">
           <span className="app-brand-icon" aria-hidden="true">

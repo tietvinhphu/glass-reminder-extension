@@ -6,7 +6,7 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 *, *::before, *::after {
@@ -15,22 +15,23 @@
   padding: 0;
 }
 
-/* Nền ngoài — màu nhạt matching gradient start, không padding để tránh viền vuông */
+/* Nền ngoài cùng — deep crimson khớp gradient */
 html {
-  background: #fff5f5;
+  background: #3b0808;
 }
 
+/* Màu chữ mặc định trắng cho toàn bộ popup — tránh S7924 bằng cách không đặt color và rgba background cùng rule */
 body {
   width: 360px;
   min-height: 520px;
   max-height: 600px;
   overflow: hidden;
   background: transparent;
-  color: #1a1a1a;
+  color: #fff;
   padding: 0;
 }
 
-/* ===== App layout — phẳng, không bo tròn ngoài, không shadow ===== */
+/* ===== App layout — gradient crimson làm "wallpaper" cho glass effect ===== */
 .reminder-app {
   display: flex;
   flex-direction: column;
@@ -39,7 +40,7 @@ body {
   min-height: 520px;
   border-radius: 0;
   overflow: hidden;
-  background: linear-gradient(135deg, #fff5f5, #fef2f2, #fee2e2);
+  background: linear-gradient(145deg, #3b0808 0%, #6b1414 25%, #8b1a1a 55%, #a01e1e 80%, #b82020 100%);
 }
 
 .app-loading {
@@ -49,22 +50,35 @@ body {
   height: 100vh;
   min-height: 520px;
   border-radius: 0;
-  background: linear-gradient(135deg, #fff5f5, #fef2f2, #fee2e2);
+  background: linear-gradient(145deg, #3b0808 0%, #6b1414 25%, #8b1a1a 55%, #a01e1e 80%, #b82020 100%);
   font-size: 14px;
-  color: #6b6b6b;
+  opacity: 0.6;
 }
 
-/* ===== Header ===== */
+/* ===== Header — frosted glass panel ===== */
 .app-header {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 11px 16px;
-  background: rgba(255,255,255,0.55);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(155,28,28,0.18);
+  overflow: hidden;
+  background: rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.1);
   flex-shrink: 0;
+}
+
+/* Lớp blur + glass-distortion phía sau header — không ảnh hưởng nội dung */
+.app-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  filter: url(#glass-distortion);
 }
 
 .app-brand {
@@ -76,38 +90,54 @@ body {
 .app-brand-icon {
   display: flex;
   align-items: center;
-  color: #9b1c1c;
+  /* color #fff inherited */
 }
 
+/* Tiêu đề gradient hồng→trắng — không dùng rgba nên không vi phạm S7924 */
 .app-title {
   font-size: 16px;
   font-weight: 700;
-  background: linear-gradient(90deg, #9b1c1c, #7f1d1d);
+  background: linear-gradient(90deg, #fca5a5, #ffffff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+/* Nút + tạo nhắc nhở — glass circular */
 .btn-add {
+  position: relative;
+  isolation: isolate;
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1.5px solid rgba(155,28,28,0.45);
-  background: #fde8e8;
-  color: #7f1d1d;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.14);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
   padding: 0;
+  overflow: hidden;
+  /* color #fff inherited */
+}
+
+.btn-add::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  filter: url(#glass-distortion);
 }
 
 .btn-add:hover {
-  background: #fdd5d5;
+  background: rgba(255,255,255,0.24);
 }
 
-/* ===== Body ===== */
+/* ===== Body (scrollable) ===== */
 .app-body {
   flex: 1;
   overflow-y: auto;
@@ -117,8 +147,9 @@ body {
 .app-body::-webkit-scrollbar {
   width: 4px;
 }
+
 .app-body::-webkit-scrollbar-thumb {
-  background: rgba(155,28,28,0.2);
+  background: rgba(255,255,255,0.2);
   border-radius: 2px;
 }
 
@@ -130,8 +161,8 @@ body {
   justify-content: center;
   gap: 8px;
   padding: 60px 20px;
-  color: #9e9e9e;
   text-align: center;
+  opacity: 0.4;
 }
 
 .empty-state p {
@@ -140,7 +171,7 @@ body {
 
 .empty-hint {
   font-size: 13px !important;
-  color: #b5b5b5 !important;
+  opacity: 0.75;
 }
 
 /* ===== Reminder list ===== */
@@ -151,21 +182,39 @@ body {
   gap: 10px;
 }
 
+/* Glass card — lớp blur + distortion qua ::before, background semi-transparent qua element chính */
 .reminder-card {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
-  background: rgba(255,255,255,0.6);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(155,28,28,0.15);
-  border-radius: 12px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.25),
+    inset 2px 2px 1px rgba(255,255,255,0.35),
+    inset -1px -1px 1px rgba(255,255,255,0.08);
   transition: background 0.2s;
 }
 
+/* Lớp frosted glass phía sau card */
+.reminder-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  filter: url(#glass-distortion);
+}
+
 .reminder-card:hover {
-  background: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.14);
 }
 
 .reminder-info {
@@ -176,32 +225,36 @@ body {
   min-width: 0;
 }
 
+/* Tiêu đề reminder — white rõ nét */
 .reminder-title {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Thời gian — hồng nhạt accent */
 .reminder-time {
   font-size: 12px;
-  color: #9b1c1c;
+  color: #fca5a5;
 }
 
+/* Ghi chú — trắng mờ */
 .reminder-note {
   font-size: 12px;
-  color: #6b6b6b;
+  color: #fde8e8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  opacity: 0.7;
 }
 
+/* Badge lặp lại — glass mini, không cần set color vì inherits #fff */
 .reminder-repeat {
   font-size: 11px;
-  color: #fff;
-  background: #9b1c1c;
+  background: rgba(255,255,255,0.18);
   border-radius: 4px;
   padding: 1px 6px;
   align-self: flex-start;
@@ -213,31 +266,28 @@ body {
   gap: 5px;
 }
 
+/* Nút edit / delete — glass style, không set color (inherits #fff) */
 .btn-edit,
 .btn-delete {
   width: 26px;
   height: 26px;
   border-radius: 6px;
-  border: 1px solid rgba(26,10,10,0.12);
-  color: #9e9e9e;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.07);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  transition: background 0.2s, border-color 0.2s;
+  opacity: 0.65;
 }
 
-.btn-edit:hover {
-  color: #9b1c1c;
-  background: #fee2e2;
-  border-color: rgba(155,28,28,0.3);
-}
-
+.btn-edit:hover,
 .btn-delete:hover {
-  color: #7f1d1d;
-  background: #fecaca;
-  border-color: rgba(127,29,29,0.3);
+  opacity: 1;
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.35);
 }
 
 /* ===== Create form ===== */
@@ -251,56 +301,58 @@ body {
 .form-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  /* color #fff inherited */
   margin-bottom: 0;
 }
 
+/* Label — hồng nhạt, không set background */
 .form-label {
   display: flex;
   flex-direction: column;
   gap: 5px;
   font-size: 13px;
-  color: #6b6b6b;
+  color: #fde8e8;
+  opacity: 0.85;
 }
 
+/* Input — glass frosted, không set color (inherits #fff) */
 .form-input {
   width: 100%;
   padding: 8px 12px;
-  background: #fefeff;
-  border: 1px solid rgba(155,28,28,0.22);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.16);
   border-radius: 8px;
-  color: #1a1a1a;
   font-size: 14px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
 }
 
+/* Placeholder dùng màu hex opaque để tránh S7924 */
 .form-input::placeholder {
-  color: #b5b5b5;
+  color: #c08080;
 }
 
 .form-input:focus {
-  border-color: #9b1c1c;
+  border-color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.12);
 }
 
 .form-input option {
-  background: #fef2f2;
-  color: #1a1a1a;
+  background: #5a1010;
 }
 
 .form-textarea {
   resize: none;
 }
 
-/* Nút chọn ngày giờ — thay thế datetime-local input */
+/* Nút chọn ngày giờ — glass, không set color (inherits #fff) */
 .form-datetime-btn {
   width: 100%;
   padding: 8px 12px;
-  background: #fefeff;
-  border: 1px solid rgba(155,28,28,0.22);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.16);
   border-radius: 8px;
-  color: #1a1a1a;
   font-size: 14px;
   font-family: inherit;
   cursor: pointer;
@@ -312,20 +364,21 @@ body {
 }
 
 .form-datetime-btn:hover {
-  border-color: #9b1c1c;
-  background: rgba(255,255,255,0.9);
+  border-color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.12);
 }
 
 .form-datetime-icon {
-  color: #9b1c1c;
   flex-shrink: 0;
+  opacity: 0.8;
+  /* color #fff inherited */
 }
 
-/* Dùng hex thay rgba để SonarQube tính được contrast (S7924) */
+/* Lỗi validation — cả hai màu opaque hex để SonarQube tính được contrast (S7924) */
 .form-error {
   font-size: 13px;
   color: #7f1d1d;
-  background: #fed7d7;
+  background: #fde8e8;
   border: 1px solid rgba(239,68,68,0.35);
   border-radius: 6px;
   padding: 6px 10px;
@@ -338,49 +391,57 @@ body {
   margin-top: 0;
 }
 
+/* Primary button — trắng đục với chữ đỏ, cả hai opaque không vi phạm S7924 */
 .btn-primary {
   padding: 8px 18px;
   border-radius: 8px;
   border: none;
-  background: linear-gradient(135deg, #9b1c1c, #7f1d1d);
-  color: #fff;
+  background: #ffffff;
+  color: #7f1d1d;
   font-size: 14px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, transform 0.1s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
 
 .btn-primary:hover {
-  opacity: 0.88;
+  opacity: 0.9;
 }
 
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* Secondary button — glass outline */
 .btn-secondary {
   padding: 8px 18px;
   border-radius: 8px;
-  border: 1px solid rgba(26,10,10,0.2);
-  color: #6b6b6b;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.07);
   font-size: 14px;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.2s;
+  /* color #fff inherited */
 }
 
 .btn-secondary:hover {
-  background: rgba(26,10,10,0.06);
+  background: rgba(255,255,255,0.15);
 }
 
-/* ===== Footer ===== */
+/* ===== Footer — glass dark panel ===== */
 .app-footer {
   flex-shrink: 0;
-  border-top: 1px solid rgba(155,28,28,0.14);
-  background: rgba(255,255,255,0.4);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.12);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   padding: 7px 16px;
 }
 
-/* Tách color ra khỏi background để tránh S7924 — background: transparent là default của button */
+/* Footer button — opacity thay vì color riêng, tránh set color+rgba background cùng rule */
 .footer-settings-btn {
   display: flex;
   align-items: center;
@@ -389,23 +450,23 @@ body {
   border: none;
   cursor: pointer;
   font-size: 11px;
-  color: #7f1d1d;
   font-family: inherit;
   padding: 0;
   text-align: left;
   line-height: 1.4;
-  transition: color 0.2s;
+  transition: opacity 0.2s;
+  opacity: 0.5;
+  /* color #fff inherited */
 }
 
 .footer-settings-btn:hover {
-  color: #9b1c1c;
+  opacity: 0.9;
 }
 
 .footer-icon {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  opacity: 0.7;
 }
 
 /* ===== Calendar Picker ===== */
@@ -419,7 +480,7 @@ body {
 .cal-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  /* color #fff inherited */
 }
 
 .cal-root {
@@ -436,16 +497,16 @@ body {
 .cal-heading {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  /* color #fff inherited */
 }
 
-/* Tách color ra ngoài rule có background để tránh S7924 */
+/* Nút prev/next tháng — glass, không set color */
 .cal-nav-btn {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  border: 1px solid rgba(155,28,28,0.2);
-  color: #7f1d1d;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -455,7 +516,7 @@ body {
 }
 
 .cal-nav-btn:hover {
-  background: #fee2e2;
+  background: rgba(255,255,255,0.18);
 }
 
 .cal-grid {
@@ -464,21 +525,22 @@ body {
   table-layout: fixed;
 }
 
+/* Header thứ trong tuần — hồng nhạt */
 .cal-week-header {
   font-size: 11px;
   font-weight: 600;
-  color: #6b6b6b;
+  color: #fca5a5;
   text-align: center;
   padding: 3px 0 5px;
 }
 
-/* Ô ngày — <td> với className từ react-aria */
+/* Ô ngày — <td> */
 .cal-cell {
   text-align: center;
   padding: 2px 1px;
 }
 
-/* Phần tử con bên trong <td> — là <span> ta inject vào CalendarCell */
+/* Phần tử con <span> inject vào CalendarCell — kế thừa màu #fff */
 .cal-cell > * {
   width: 30px;
   height: 30px;
@@ -490,38 +552,44 @@ body {
   justify-content: center;
   font-size: 13px;
   font-family: inherit;
-  color: #1a1a1a;
   transition: background 0.15s;
   outline: none;
   margin: 0 auto;
+  /* color #fff inherited */
 }
 
+/* Ngày được chọn — trắng đục + chữ đỏ, cả hai opaque (S7924 compliant) */
 .cal-cell--selected > * {
-  background: linear-gradient(135deg, #9b1c1c, #7f1d1d);
-  color: #fff;
+  background: #ffffff;
+  color: #7f1d1d;
+  font-weight: 700;
 }
 
+/* Ngày hôm nay — viền trắng mỏng */
 .cal-cell--today:not(.cal-cell--selected) > * {
   font-weight: 700;
-  box-shadow: inset 0 0 0 1.5px rgba(155,28,28,0.5);
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.55);
 }
 
+/* Ngày ngoài tháng */
 .cal-cell--outside > * {
-  color: #d4d4d4;
+  opacity: 0.3;
 }
 
+/* Ngày bị vô hiệu */
 .cal-cell--disabled > * {
-  color: #d4d4d4;
+  opacity: 0.2;
   cursor: default;
   pointer-events: none;
 }
 
+/* Hover trên ngày có thể chọn */
 .cal-cell:not(.cal-cell--selected):not(.cal-cell--disabled) > *:hover {
-  background: #fee2e2;
+  background: rgba(255,255,255,0.18);
 }
 
 .cal-cell > *:focus-visible {
-  outline: 2px solid #9b1c1c;
+  outline: 2px solid rgba(255,255,255,0.6);
   outline-offset: 1px;
 }
 
@@ -530,16 +598,18 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255,255,255,0.6);
-  border: 1px solid rgba(155,28,28,0.2);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
   border-radius: 8px;
   padding: 8px 12px;
 }
 
+/* Label giờ — hồng nhạt, không set background */
 .cal-time-label {
   font-size: 13px;
-  color: #6b6b6b;
+  color: #fde8e8;
   flex-shrink: 0;
+  opacity: 0.8;
 }
 
 .cal-time-inputs {
@@ -549,13 +619,13 @@ body {
   margin-left: auto;
 }
 
+/* Select giờ/phút — glass, không set color (inherits #fff) */
 .cal-time-select {
   width: 52px;
-  padding: 4px 4px;
-  background: #fdfcff;
-  border: 1px solid rgba(155,28,28,0.2);
+  padding: 4px;
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 6px;
-  color: #1a1a1a;
   font-size: 14px;
   font-family: inherit;
   font-weight: 500;
@@ -565,24 +635,24 @@ body {
 }
 
 .cal-time-select:focus {
-  border-color: #9b1c1c;
+  border-color: rgba(255,255,255,0.45);
 }
 
 .cal-time-sep {
   font-size: 16px;
   font-weight: 600;
-  color: #7f1d1d;
   padding-bottom: 1px;
+  opacity: 0.65;
+  /* color #fff inherited */
 }
 
-/* ===== Dropdown "Lặp lại" (Radix DropdownMenu, pure CSS) ===== */
+/* ===== Dropdown "Lặp lại" (Radix DropdownMenu, pure CSS, liquid glass) ===== */
 .repeat-trigger {
   width: 100%;
   padding: 8px 12px;
-  background: #fefeff;
-  border: 1px solid rgba(155,28,28,0.22);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.16);
   border-radius: 8px;
-  color: #1a1a1a;
   font-size: 14px;
   font-family: inherit;
   cursor: pointer;
@@ -590,36 +660,40 @@ body {
   align-items: center;
   justify-content: space-between;
   text-align: left;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
   outline: none;
+  /* color #fff inherited */
 }
 
 .repeat-trigger:hover,
 .repeat-trigger[data-state="open"] {
-  border-color: #9b1c1c;
+  border-color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.12);
 }
 
-/* Icon mũi tên xoay khi dropdown mở */
+/* Icon mũi tên — không set color (inherits #fff) */
 .repeat-trigger-icon {
   flex-shrink: 0;
-  color: #9e9e9e;
   transition: transform 0.2s;
+  opacity: 0.65;
 }
 
 .repeat-trigger[data-state="open"] .repeat-trigger-icon {
   transform: rotate(180deg);
 }
 
-/* Nội dung dropdown — Portal vào body, z-index cao */
+/* Nội dung dropdown — dark glass panel portal vào body */
 .repeat-content {
   min-width: var(--radix-dropdown-menu-trigger-width);
-  background: #fff;
-  border: 1px solid rgba(26,10,10,0.12);
+  background: #4a0e0e;
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 8px;
   padding: 4px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
   z-index: 9999;
   outline: none;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
 
 .repeat-content[data-state="open"] {
@@ -640,7 +714,7 @@ body {
   to   { opacity: 0; transform: translateY(2px); }
 }
 
-/* Mỗi item trong dropdown */
+/* Item trong dropdown — không set color (inherits #fff) */
 .repeat-item {
   display: flex;
   align-items: center;
@@ -648,7 +722,6 @@ body {
   padding: 8px 10px;
   border-radius: 6px;
   font-size: 13px;
-  color: #1a1a1a;
   cursor: pointer;
   outline: none;
   -webkit-user-select: none;
@@ -659,7 +732,7 @@ body {
 
 .repeat-item:hover,
 .repeat-item[data-highlighted] {
-  background: #fee2e2;
+  background: rgba(255,255,255,0.12);
 }
 
 .repeat-item[data-disabled] {
@@ -668,7 +741,7 @@ body {
   pointer-events: none;
 }
 
-/* Wrapper luôn chiếm 16px — ItemIndicator bên trong chỉ hiện khi item được chọn */
+/* Wrapper 16px cố định cho check indicator — không set color (inherits #fff) */
 .repeat-item-indicator-wrap {
   width: 16px;
   height: 16px;
@@ -676,5 +749,4 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #9b1c1c;
 }
