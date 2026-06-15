@@ -12,7 +12,7 @@ interface AuthGateProps {
  * Auth gate — kiểm tra login trước khi render app
  * Flow: initialize từ storage → isLoggedIn ? children : LoginScreen
  */
-export const AuthGate = ({ children }: AuthGateProps) => {
+export const AuthGate = ({ children }: Readonly<AuthGateProps>) => {
   const { isLoggedIn, isLoading, initialize } = useAuth();
 
   // Đọc token từ storage khi popup mount

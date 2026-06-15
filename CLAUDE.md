@@ -116,6 +116,50 @@ global.chrome = {
 
 ---
 
+## 🔍 POST-TASK BẮT BUỘC — Query SonarQube và fix sạch
+
+> **KHÔNG được báo "xong" trước khi bước này hoàn tất.**
+
+Sau khi implement xong bất kỳ task nào có chỉnh sửa code, Claude PHẢI:
+
+### Bước 1 — Gọi SonarQube MCP analyze các file vừa sửa
+
+Nếu SonarQube MCP tool `analyze_file_list` có sẵn:
+```
+analyze_file_list([<danh sách file đã sửa trong task>])
+```
+
+Nếu MCP không available (Docker chưa chạy / chưa kết nối):
+- Đọc lại từng file vừa sửa
+- Tự check theo các rule phổ biến nhất của project (xem bảng bên dưới)
+
+### Bước 2 — Fix TẤT CẢ issues trả về
+
+Không bỏ qua issue nào. Thứ tự ưu tiên:
+1. **Security** (S6702, S2068, ...) — fix ngay, không NOSONAR
+2. **Bug** (S7764, S1874, ...) — fix code
+3. **Code smell** (S6759, S6772, S3516, ...) — fix code
+4. **Contrast/CSS** (S7924) — fix màu nếu thật sự sai; NOSONAR nếu false-positive do dark theme
+
+### Bước 3 — Re-analyze đến khi 0 issues
+
+Lặp lại Bước 1 → Bước 2 cho đến khi `analyze_file_list` trả về **0 issues mới** trên các file vừa sửa.
+
+### Rules hay gặp trong project này
+
+| Rule | Mô tả | Cách fix |
+|------|--------|----------|
+| S6759 | Props không dùng `Readonly<>` | Bọc interface trong `Readonly<Props>` |
+| S6772 | JSX text literal mơ hồ | Bọc trong `{"text"}` |
+| S7764 | Dùng `window.*` trong extension | Đổi sang `globalThis.*` |
+| S1874 | API deprecated (FormEvent...) | Dùng `SyntheticEvent<HTMLFormElement>` |
+| S3516 | Function luôn return cùng 1 giá trị | Bỏ return thừa |
+| S7924 | CSS contrast thấp | Fix màu hoặc thêm `/* NOSONAR */` nếu dark theme |
+| S6702 | Secret/token hardcode | KHÔNG bao giờ NOSONAR — phải xóa token |
+| S1128 | Import không dùng | Xóa import |
+
+---
+
 ## 📋 Output format khi nhận task
 
 ```
@@ -147,4 +191,10 @@ npm test -- --run     # Vitest single run
 npm run type-check    # tsc --noEmit
 npm run lint          # ESLint
 npm run build         # Production build
+
+# SonarCloud scan — chạy CUỐI CÙNG trước git push (sau khi tất cả checks pass)
+# PowerShell:
+$env:SONAR_TOKEN="<token>"; npm run sonar -- -Dsonar.token=$env:SONAR_TOKEN
 ```
+
+> **Thứ tự quality gate:** tests → type-check → lint → SonarLint (VS Code) → sonar CLI → git push

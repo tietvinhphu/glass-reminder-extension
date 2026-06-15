@@ -69,16 +69,29 @@ const openAlarmWindow = async (): Promise<void> => {
       }
     }
 
+    // Đếm pending alarms để tính chiều cao cửa sổ ban đầu
+    const allStorage = await browser.storage.local.get(null);
+    const pendingCount = Object.keys(allStorage).filter((k) =>
+      k.startsWith("alarm:pending:"),
+    ).length;
+    // Base 240px + 100px mỗi alarm, tối thiểu 360px, tối đa 660px
+    const windowHeight = Math.min(Math.max(360, 240 + pendingCount * 100), 660);
+
     const newWindow = await browser.windows.create({
       url: browser.runtime.getURL("alarm.html"),
       type: "popup",
       width: 460,
-      height: 450,
+      height: windowHeight,
       focused: true,
     });
 
     if (newWindow.id !== undefined) {
       await browser.storage.local.set({ [ALARM_WINDOW_KEY]: newWindow.id });
+      // Focus lần 2 sau 600ms để đảm bảo cửa sổ nhảy lên trên cùng
+      const winId = newWindow.id;
+      setTimeout(() => {
+        browser.windows.update(winId, { focused: true }).catch(() => {});
+      }, 600);
     }
   } catch (err) {
     console.error("[Glass Reminder] Không mở được alarm window:", err);

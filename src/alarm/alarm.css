@@ -3,7 +3,6 @@
   font-family: Inter, system-ui, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  color-scheme: dark;
 }
 
 *, *::before, *::after {
@@ -13,218 +12,267 @@
 }
 
 body {
-  width: 450px;
-  height: 380px;
+  width: 420px;
+  min-height: 260px;
+  height: auto;
   overflow: hidden;
+  background: #1a0505;
 }
 
 /* ===== Animations ===== */
 
-/* Rung lắc có khoảng dừng — shake 40% đầu, nghỉ 60% còn lại của mỗi chu kỳ */
-@keyframes shake-with-pause {
-  0%   { transform: translateX(0) rotate(0deg); }
-  5%   { transform: translateX(-9px) rotate(-2deg); }
-  10%  { transform: translateX(9px) rotate(2deg); }
-  15%  { transform: translateX(-9px) rotate(-1.5deg); }
-  20%  { transform: translateX(9px) rotate(1.5deg); }
-  25%  { transform: translateX(-6px) rotate(-1deg); }
-  30%  { transform: translateX(6px) rotate(1deg); }
-  35%  { transform: translateX(-3px); }
-  40%  { transform: translateX(0); }
-  100% { transform: translateX(0); }
-}
-
-/* Viền nhấp nháy đỏ */
+/* Glow đỏ nhấp nháy — thay cho shake (framer-motion xử lý entrance) */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5), 0 0 50px rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 8px 32px rgba(220,38,38,0.5);
   }
   50% {
-    box-shadow: 0 0 40px rgba(239, 68, 68, 1), 0 0 100px rgba(239, 68, 68, 0.5);
-    border-color: rgb(239, 68, 68);
+    box-shadow: 0 8px 48px rgba(220,38,38,0.9), 0 0 0 6px rgba(220,38,38,0.12);
   }
-}
-
-/* Nền nhấp nháy */
-@keyframes bg-flash {
-  0%, 100% { background: #080808; }
-  50%       { background: #1c0505; }
 }
 
 /* Icon chuông rung */
-@keyframes icon-swing {
+@keyframes bell-swing {
   0%, 100% { transform: rotate(0deg); }
   20%       { transform: rotate(-15deg); }
   40%       { transform: rotate(15deg); }
-  60%       { transform: rotate(-10deg); }
-  80%       { transform: rotate(10deg); }
+  60%       { transform: rotate(-8deg); }
+  80%       { transform: rotate(8deg); }
 }
 
-/* ===== Layout ===== */
+/* ===== Outer layout ===== */
 .alarm-overlay {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100vh;
-  animation: bg-flash 1.2s ease-in-out infinite;
+  min-height: 100vh;
+  padding: 20px;
 }
 
-.alarm-card {
-  width: 390px;
-  padding: 32px 28px;
-  background: linear-gradient(145deg, #1a0808, #2a0a0a);
-  border: 2px solid rgba(239, 68, 68, 0.6);
+/* ===== Alert Card ===== */
+/* Nền đỏ, bo tròn — framer-motion xử lý entrance animation */
+.alert-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  padding: 24px;
+  background: #dc2626;
   border-radius: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  animation: shake-with-pause 2.5s ease-in-out infinite,
-             pulse-glow 1.2s ease-in-out infinite;
-}
-
-.alarm-icon {
-  font-size: 52px;
-  line-height: 1;
-  animation: icon-swing 1s ease-in-out infinite;
-  display: block;
-}
-
-.alarm-title {
-  font-size: 24px;
-  font-weight: 700;
+  overflow: hidden;
   color: #fff;
-  text-shadow: 0 0 20px rgba(239, 68, 68, 0.7);
-  word-break: break-word;
+  animation: pulse-glow 2s ease-in-out infinite;
 }
 
-.alarm-time {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
-  letter-spacing: 0.02em;
+/* Vòng tròn chứa icon chuông — góc trên phải */
+.alert-icon-wrap {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.alarm-note {
-  font-size: 14px;
-  color: rgba(255, 210, 210, 0.9);
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  border-radius: 8px;
-  padding: 7px 14px;
-  width: 100%;
-  word-break: break-word;
+.alert-icon-inner {
+  animation: bell-swing 1.2s ease-in-out infinite;
+  display: flex;
 }
 
-.alarm-reopen-hint {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.35);
-  margin-top: -4px;
-}
-
-/* ===== Confirm button ===== */
-.alarm-confirm-btn {
-  margin-top: 8px;
-  padding: 13px 36px;
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
+/* Nút X đóng cửa sổ — không xác nhận, alarm sẽ mở lại sau 2 phút */
+.alert-dismiss-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   border: none;
-  border-radius: 12px;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 700;
-  font-family: inherit;
   cursor: pointer;
-  transition: transform 0.12s, opacity 0.2s;
-  box-shadow: 0 4px 24px rgba(220, 38, 38, 0.5);
-  letter-spacing: 0.02em;
-}
-
-.alarm-confirm-btn:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: scale(1.04);
-}
-
-.alarm-confirm-btn:active:not(:disabled) {
-  transform: scale(0.96);
-}
-
-.alarm-confirm-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* ===== Multi-alarm support ===== */
-.alarm-loading-text {
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 14px;
-}
-
-.alarm-count-badge {
-  font-size: 12px;
-  color: rgba(255, 120, 120, 0.95);
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  border-radius: 20px;
-  padding: 3px 14px;
-  margin-top: -4px;
-}
-
-.alarm-list {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 180px;
-  overflow-y: auto;
-}
-
-.alarm-list::-webkit-scrollbar {
-  width: 4px;
-}
-.alarm-list::-webkit-scrollbar-thumb {
-  background: rgba(239, 68, 68, 0.35);
-  border-radius: 2px;
-}
-
-.alarm-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 10px;
-  transition: opacity 0.35s;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s;
 }
 
-.alarm-item--confirmed {
-  opacity: 0.35;
+.alert-dismiss-btn:hover {
+  background: rgba(0,0,0,0.2);
 }
 
-.alarm-item-info {
+/* Tiêu đề nhắc nhở */
+.alert-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  padding-right: 56px; /* tránh bị icon chồng lên */
+}
+
+/* Thời gian nhắc nhở */
+.alert-time {
+  font-size: 12px;
+  color: #fde8e8;
+  letter-spacing: 0.02em;
+  margin-top: 6px;
+}
+
+/* Mô tả — dùng cho single-alarm description và ghi chú */
+.alert-description {
+  font-size: 13px;
+  color: #fde8e8;
+  margin-top: 4px;
+  max-width: 80%;
+  line-height: 1.5;
+}
+
+/* Ghi chú với nền tối hơn */
+.alert-note {
+  display: block;
+  font-size: 12px;
+  color: #fde8e8;
+  background: rgba(0,0,0,0.18);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-top: 6px;
+  word-break: break-word;
+}
+
+/* Hint nhỏ "Tự mở lại sau 2 phút" */
+.alert-hint {
+  font-size: 11px;
+  color: #fca5a5;
+  margin-top: 4px;
+}
+
+/* Badge số lượng alarm khi có nhiều sự kiện */
+.alert-multi-badge {
+  display: inline-block;
+  font-size: 11px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 20px;
+  padding: 2px 12px;
+  margin-top: 8px;
+}
+
+/* Text hiển thị khi đang loading */
+.alert-loading-text {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* Hint ở multi-alarm có margin-top nhỏ hơn single */
+.alert-hint--multi {
+  margin-top: 6px;
+}
+
+/* Danh sách các alarm (multi-alarm) */
+.alert-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.alert-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 8px;
+  transition: opacity 0.3s;
+}
+
+.alert-item--confirmed {
+  opacity: 0.38;
+}
+
+.alert-item-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-  text-align: left;
 }
 
-/* Small confirm button inside each alarm item */
-.alarm-confirm-btn--small {
+.alert-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.alert-item-time {
+  font-size: 11px;
+  color: #fde8e8;
+}
+
+.alert-item-note {
+  font-size: 11px;
+  color: #fde8e8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Nút confirm nhỏ trong mỗi alarm item */
+.alert-item-btn {
   flex-shrink: 0;
-  padding: 5px 12px !important;
-  font-size: 13px !important;
-  margin-top: 0 !important;
-  min-width: 70px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
 }
 
-/* "Xác nhận tất cả" button — full width, darker red */
-.alarm-confirm-btn--all {
+.alert-item-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.15);
+}
+
+.alert-item-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Nút CTA chính — trắng, full-width, rounded pill */
+.alert-confirm-btn {
+  display: block;
   width: 100%;
-  background: linear-gradient(135deg, #991b1b, #7f1d1d) !important;
-  box-shadow: 0 4px 20px rgba(153, 27, 27, 0.5) !important;
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 9999px;
+  border: none;
+  background: #fff;
+  color: #dc2626;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s, transform 0.1s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.alert-confirm-btn:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.alert-confirm-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.alert-confirm-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

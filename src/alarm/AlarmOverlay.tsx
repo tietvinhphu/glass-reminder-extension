@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Bell, X } from "lucide-react";
 import browser from "webextension-polyfill";
 
 /** Data của một alarm đang pending xác nhận */
@@ -61,8 +63,8 @@ const useAlarmSound = (active: boolean) => {
     const playPattern = () => {
       if (!isActive) return;
       const now = audioCtx.currentTime;
-      beep(now, 880);        // A5
-      beep(now + 0.22, 880); // A5
+      beep(now, 880);         // A5
+      beep(now + 0.22, 880);  // A5
       beep(now + 0.44, 1320); // E6 — nốt cao hơn ở cuối
     };
 
@@ -77,14 +79,43 @@ const useAlarmSound = (active: boolean) => {
   }, [active]);
 };
 
+/** Spring animation cho card — xuất hiện từ dưới lên với bounce nhẹ */
+const cardVariants = {
+  hidden: { opacity: 0, y: 50, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring" as const,
+      stiffness: 400,
+      damping: 25,
+      staggerChildren: 0.08,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: 20,
+    scale: 0.98,
+    transition: { duration: 0.2 },
+  },
+};
+
+/** Stagger variants cho từng phần tử bên trong card */
+const itemVariants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0 },
+};
+
 /**
  * Cửa sổ alarm overlay — hiện tất cả sự kiện pending cùng lúc,
- * rung lắc, có âm thanh, tự refresh khi có alarm mới được thêm
+ * có âm thanh, tự refresh khi có alarm mới được thêm
  */
 export const AlarmOverlay = () => {
   const [alarms, setAlarms] = useState<PendingAlarm[]>([]);
   const [confirmedIds, setConfirmedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [visible, setVisible] = useState(true);
 
   const pendingAlarms = alarms.filter((a) => !confirmedIds.has(a.reminderId));
   const allDone = alarms.length > 0 && pendingAlarms.length === 0;
@@ -97,6 +128,11 @@ export const AlarmOverlay = () => {
     setAlarms(pending);
     setLoading(false);
     if (pending.length === 0) globalThis.close();
+  }, []);
+
+  // Focus cửa sổ alarm ngay khi mở để nhảy lên trên cùng
+  useEffect(() => {
+    globalThis.focus();
   }, []);
 
   useEffect(() => {
@@ -116,9 +152,24 @@ export const AlarmOverlay = () => {
     return () => browser.storage.onChanged.removeListener(onStorageChange);
   }, [loadAlarms]);
 
-  // Đóng cửa sổ sau khi tất cả đã xác nhận
+  // Gửi message về background để resize cửa sổ khớp với nội dung thực tế
+  useEffect(() => {
+    if (alarms.length === 0) return;
+    const timer = setTimeout(() => {
+      const cardEl = document.querySelector(".alert-card");
+      if (!cardEl) return;
+      // 60px = padding overlay + OS chrome title bar
+      const neededHeight = (cardEl as HTMLElement).offsetHeight + 60;
+      browser.runtime.sendMessage({ type: "RESIZE_WINDOW", height: neededHeight })
+        .catch(() => {}); // bỏ qua nếu SW chưa sẵn sàng
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [alarms.length]);
+
+  // Đóng cửa sổ sau khi tất cả đã xác nhận (delay nhỏ cho animation exit)
   useEffect(() => {
     if (allDone) {
+      setVisible(false);
       const t = setTimeout(() => globalThis.close(), 300);
       return () => clearTimeout(t);
     }
@@ -149,80 +200,129 @@ export const AlarmOverlay = () => {
     setConfirmedIds(new Set(alarms.map((a) => a.reminderId)));
   };
 
+  /** Đóng cửa sổ mà không xác nhận — alarm sẽ tự mở lại sau 2 phút */
+  const handleDismiss = () => {
+    setVisible(false);
+    setTimeout(() => globalThis.close(), 250);
+  };
+
+  // Khi đang loading, vẫn show card đơn giản để resize hoạt động
   if (loading || alarms.length === 0) {
     return (
       <div className="alarm-overlay">
-        <div className="alarm-card">
-          <span className="alarm-icon">⏰</span>
-          <p className="alarm-loading-text">Đang tải...</p>
+        <div className="alert-card">
+          <span className="alert-loading-text">{"Đang tải..."}</span>
         </div>
       </div>
     );
   }
 
+  const firstAlarm = alarms[0];
+  const isMulti = alarms.length > 1;
+  const mainTitle = isMulti
+    ? `${alarms.length} nhắc nhở cùng lúc`
+    : firstAlarm.data.title;
+
   return (
     <div className="alarm-overlay">
-      <div className="alarm-card">
-        <span className="alarm-icon">⏰</span>
-
-        {alarms.length > 1 && (
-          <p className="alarm-count-badge">{alarms.length} sự kiện cùng lúc</p>
-        )}
-
-        <div className="alarm-list">
-          {alarms.map((alarm) => {
-            const isConfirmed = confirmedIds.has(alarm.reminderId);
-            return (
-              <div
-                key={alarm.reminderId}
-                className={`alarm-item${isConfirmed ? " alarm-item--confirmed" : ""}`}
-              >
-                <div className="alarm-item-info">
-                  <span className="alarm-title">{alarm.data.title}</span>
-                  <span className="alarm-time">
-                    {formatDatetime(alarm.data.datetime)}
-                  </span>
-                  {alarm.data.note && (
-                    <span className="alarm-note">{alarm.data.note}</span>
-                  )}
-                </div>
-                <button
-                  className="alarm-confirm-btn alarm-confirm-btn--small"
-                  type="button"
-                  onClick={() => void confirmOne(alarm.reminderId)}
-                  disabled={isConfirmed}
-                >
-                  {isConfirmed ? "✓" : "Xác nhận"}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-
-        <p className="alarm-reopen-hint">
-          Tự mở lại sau 2 phút nếu chưa xác nhận
-        </p>
-
-        {alarms.length > 1 ? (
-          <button
-            className="alarm-confirm-btn alarm-confirm-btn--all"
-            type="button"
-            onClick={() => void confirmAll()}
-            disabled={allDone}
+      <AnimatePresence>
+        {visible && (
+          <motion.div
+            className="alert-card"
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            role="alertdialog"
+            aria-live="assertive"
           >
-            ✓ Xác nhận tất cả ({pendingAlarms.length})
-          </button>
-        ) : (
-          <button
-            className="alarm-confirm-btn"
-            type="button"
-            onClick={() => void confirmOne(alarms[0].reminderId)}
-            disabled={confirmedIds.has(alarms[0].reminderId)}
-          >
-            ✓ Đã xác nhận
-          </button>
+            {/* Nút dismiss — đóng mà không xác nhận */}
+            <motion.button
+              type="button"
+              className="alert-dismiss-btn"
+              aria-label="Đóng, nhắc lại sau"
+              onClick={handleDismiss}
+              variants={itemVariants}
+            >
+              <X size={14} />
+            </motion.button>
+
+            {/* Icon chuông với pulse animation */}
+            <div className="alert-icon-wrap" aria-hidden="true">
+              <span className="alert-icon-inner">
+                <Bell size={22} color="#fff" />
+              </span>
+            </div>
+
+            {/* Tiêu đề */}
+            <motion.h3 className="alert-title" variants={itemVariants}>
+              {mainTitle}
+            </motion.h3>
+
+            {/* Single alarm: thời gian + ghi chú */}
+            {!isMulti && (
+              <motion.div variants={itemVariants}>
+                <p className="alert-time">{formatDatetime(firstAlarm.data.datetime)}</p>
+                {firstAlarm.data.note && (
+                  <span className="alert-note">{firstAlarm.data.note}</span>
+                )}
+                <p className="alert-hint">{"Tự mở lại sau 2 phút nếu chưa xác nhận"}</p>
+              </motion.div>
+            )}
+
+            {/* Multi-alarm: danh sách từng sự kiện */}
+            {isMulti && (
+              <motion.div variants={itemVariants}>
+                <p className="alert-hint alert-hint--multi">
+                  {"Tự mở lại sau 2 phút nếu chưa xác nhận"}
+                </p>
+                <ul className="alert-list">
+                  {alarms.map((alarm) => {
+                    const isConfirmed = confirmedIds.has(alarm.reminderId);
+                    return (
+                      <li
+                        key={alarm.reminderId}
+                        className={`alert-item${isConfirmed ? " alert-item--confirmed" : ""}`}
+                      >
+                        <div className="alert-item-info">
+                          <span className="alert-item-title">{alarm.data.title}</span>
+                          <span className="alert-item-time">
+                            {formatDatetime(alarm.data.datetime)}
+                          </span>
+                          {alarm.data.note && (
+                            <span className="alert-item-note">{alarm.data.note}</span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className="alert-item-btn"
+                          onClick={() => void confirmOne(alarm.reminderId)}
+                          disabled={isConfirmed}
+                        >
+                          {isConfirmed ? "✓" : "OK"}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </motion.div>
+            )}
+
+            {/* Nút CTA chính */}
+            <motion.button
+              type="button"
+              className="alert-confirm-btn"
+              onClick={() => void (isMulti ? confirmAll() : confirmOne(firstAlarm.reminderId))}
+              disabled={isMulti ? allDone : confirmedIds.has(firstAlarm.reminderId)}
+              variants={itemVariants}
+            >
+              {isMulti
+                ? `✓ Xác nhận tất cả (${pendingAlarms.length})`
+                : "Đã hiểu"}
+            </motion.button>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 };

@@ -36,3 +36,14 @@ export const getReminderById = async (id: string): Promise<Reminder | null> => {
   const reminders = await getReminders();
   return reminders.find((r) => r.id === id) ?? null;
 };
+
+/** Cập nhật reminder theo id — giữ nguyên id và createdAt */
+export const updateReminder = async (id: string, data: ReminderFormData): Promise<Reminder> => {
+  const reminders = await getReminders();
+  const existing = reminders.find((r) => r.id === id);
+  if (!existing) throw new Error(`Reminder ${id} không tồn tại`);
+  const updated: Reminder = { ...existing, ...data };
+  const rest = reminders.filter((r) => r.id !== id);
+  await browser.storage.local.set({ [STORAGE_KEY]: [...rest, updated] });
+  return updated;
+};

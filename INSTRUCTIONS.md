@@ -33,20 +33,26 @@ CURSOR CLOUD AGENT
         ↓ owner học, hiểu, copy code
 LOCAL VSCODE (quality gate cuối cùng)
   - ESLint + Prettier   → code clean
-  - SonarLint           → security check
+  - SonarLint           → security check real-time (trong lúc code)
   - Vitest + Coverage   → test xanh
   - Error Lens          → lỗi inline
   - Edge DevTools       → debug extension
+  - npm run sonar       → upload kết quả lên SonarCloud (cuối cùng, trước push)
         ↓ owner confirm ổn
 GIT PUSH lên main
         ↓ tự động trigger
 CURSOR CLOUD AUTOMATIONS (background)
-  - Find vulnerabilities
+  - Find vulnerabilities (có thể query SonarCloud qua MCP)
   - Find critical bugs
   - Fix CI failures
   - Scan codebase
   - Remediate dependencies
 ```
+
+> **Tại sao sonar-scanner ở CUỐI, không phải đầu?**
+> SonarLint VS Code đã chạy real-time trong lúc code → bắt issue ngay khi gõ.
+> sonar-scanner CLI dùng để "đóng dấu" snapshot sạch lên SonarCloud trước khi push,
+> tạo lịch sử theo thời gian và cho phép Cursor Automations query qua MCP.
 
 ---
 
@@ -309,19 +315,22 @@ files/TDD_WORKFLOW.md     ← Prompt templates cho từng checkpoint
 
 ## ✅ Pre-push Checklist (Local VSCode)
 
-Trước khi `git push origin main`, tự kiểm tra:
+Trước khi `git push origin main`, tự kiểm tra **theo thứ tự**:
 
 ```
 □ Vitest sidebar → tất cả tests XANH
 □ Coverage Gutters → không có dòng đỏ quan trọng
 □ Problems panel (Ctrl+Shift+M) → 0 ESLint errors
-□ SonarLint → không có security warning
+□ SonarLint panel → không có security/bug warning còn lại
 □ npm run type-check → pass
-□ npm audit → không có critical
+□ npm audit → không có critical/high
 □ Không có console.log token/email/sensitive data
 □ Không có hardcoded credentials
 □ Tất cả code mới có comment giải thích
 □ Load extension vào Edge → test tính năng vừa làm
+□ npm run sonar (bước cuối) → upload snapshot lên SonarCloud
+    PowerShell: $env:SONAR_TOKEN="<token>"; npm run sonar -- -Dsonar.token=$env:SONAR_TOKEN
+    ⚠ Chỉ chạy khi tất cả ô trên đã tích — tránh upload code còn lỗi
 ```
 
 ---

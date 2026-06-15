@@ -1,40 +1,63 @@
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Calendar as CalendarIcon } from "lucide-react";
 
-import type { ReminderFormData } from "@/src/shared/types/reminder";
+import type { Reminder, ReminderFormData } from "@/src/shared/types/reminder";
+import { CalendarPicker } from "./CalendarPicker";
+import { RepeatSelect } from "./RepeatSelect";
 
 interface CreateReminderFormProps {
   onSubmit: (data: ReminderFormData) => void;
   onCancel: () => void;
+  /** Có giá trị khi đang ở chế độ chỉnh sửa — pre-fill form với data hiện tại */
+  initialData?: Reminder;
 }
 
-/** Chuyển datetime-local input string thành unix timestamp (ms) */
-const toTimestamp = (datetimeLocal: string): number =>
-  new Date(datetimeLocal).getTime();
+/** Format unix timestamp (ms) thành chuỗi ngày giờ dễ đọc cho nút chọn ngày */
+const formatDateDisplay = (ts: number): string =>
+  new Date(ts).toLocaleString("vi-VN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
-/** Format Date thành chuỗi datetime-local input (YYYY-MM-DDTHH:mm) */
-const toDatetimeLocal = (date: Date): string => {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+/** Variants animation cho transition giữa form và calendar */
+const slideLeft = {
+  initial: { opacity: 0, x: -24 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -24 },
 };
 
-/** Form tạo reminder mới — validate trước khi submit */
-export const CreateReminderForm = ({ onSubmit, onCancel }: CreateReminderFormProps) => {
-  // Mặc định thời gian = 1 giờ sau hiện tại
-  const defaultDatetime = toDatetimeLocal(new Date(Date.now() + 60 * 60 * 1000));
+const slideRight = {
+  initial: { opacity: 0, x: 24 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: 24 },
+};
 
-  const [title, setTitle] = useState("");
-  const [datetimeLocal, setDatetimeLocal] = useState(defaultDatetime);
-  const [note, setNote] = useState("");
-  const [repeat, setRepeat] = useState<ReminderFormData["repeat"]>("none");
+/** Form tạo / chỉnh sửa reminder — validate trước khi submit, có calendar picker */
+export const CreateReminderForm = ({ onSubmit, onCancel, initialData }: Readonly<CreateReminderFormProps>) => {
+  const isEditing = initialData !== undefined;
+
+  const [title, setTitle] = useState(initialData?.title ?? "");
+  /** Unix timestamp (ms) của ngày giờ được chọn */
+  const [datetime, setDatetime] = useState<number>(
+    initialData?.datetime ?? Date.now() + 60 * 60 * 1000,
+  );
+  const [note, setNote] = useState(initialData?.note ?? "");
+  const [repeat, setRepeat] = useState<ReminderFormData["repeat"]>(initialData?.repeat ?? "none");
   const [error, setError] = useState("");
+  /** Điều khiển hiển thị calendar picker thay cho form chính */
+  const [showCalendar, setShowCalendar] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!title.trim()) {
       setError("Vui lòng nhập tiêu đề");
       return;
     }
-    const datetime = toTimestamp(datetimeLocal);
     if (datetime <= Date.now()) {
       setError("Thời gian phải ở tương lai");
       return;
@@ -48,67 +71,86 @@ export const CreateReminderForm = ({ onSubmit, onCancel }: CreateReminderFormPro
   };
 
   return (
-    <form className="create-form" onSubmit={handleSubmit}>
-      <h2 className="form-title">Tạo nhắc nhở</h2>
-
-      <label className="form-label">
-        Tiêu đề <span aria-hidden="true">*</span>
-        <input
-          className="form-input"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Họp team, deadline báo cáo..."
-          maxLength={100}
-          autoFocus
-        />
-      </label>
-
-      <label className="form-label">
-        Thời gian <span aria-hidden="true">*</span>
-        <input
-          className="form-input"
-          type="datetime-local"
-          value={datetimeLocal}
-          onChange={(e) => setDatetimeLocal(e.target.value)}
-        />
-      </label>
-
-      <label className="form-label">
-        Ghi chú
-        <textarea
-          className="form-input form-textarea"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="Tùy chọn..."
-          maxLength={300}
-          rows={2}
-        />
-      </label>
-
-      <label className="form-label">
-        Lặp lại
-        <select
-          className="form-input"
-          value={repeat}
-          onChange={(e) => setRepeat(e.target.value as ReminderFormData["repeat"])}
+    <AnimatePresence mode="wait" initial={false}>
+      {showCalendar ? (
+        <motion.div
+          key="calendar"
+          {...slideRight}
+          transition={{ duration: 0.2, ease: "easeOut" }}
         >
-          <option value="none">Không lặp</option>
-          <option value="daily">Mỗi ngày</option>
-          <option value="weekly">Mỗi tuần</option>
-        </select>
-      </label>
+          <CalendarPicker
+            value={datetime}
+            onConfirm={(ts) => {
+              setDatetime(ts);
+              setShowCalendar(false);
+            }}
+            onCancel={() => setShowCalendar(false)}
+          />
+        </motion.div>
+      ) : (
+        <motion.form
+          key="form"
+          className="create-form"
+          onSubmit={handleSubmit}
+          {...slideLeft}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
+          <h2 className="form-title">{isEditing ? "Chỉnh sửa nhắc nhở" : "Tạo nhắc nhở"}</h2>
 
-      {error && <p className="form-error" role="alert">{error}</p>}
+          <label className="form-label">
+            {"Tiêu đề"} <span aria-hidden="true">{"*"}</span>
+            <input
+              className="form-input"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Họp team, deadline báo cáo..."
+              maxLength={100}
+              autoFocus
+            />
+          </label>
 
-      <div className="form-actions">
-        <button type="button" className="btn-secondary" onClick={onCancel}>
-          Hủy
-        </button>
-        <button type="submit" className="btn-primary">
-          Tạo nhắc nhở
-        </button>
-      </div>
-    </form>
+          <label className="form-label">
+            {"Thời gian"} <span aria-hidden="true">{"*"}</span>
+            <button
+              type="button"
+              className="form-datetime-btn"
+              onClick={() => setShowCalendar(true)}
+            >
+              <CalendarIcon size={14} className="form-datetime-icon" aria-hidden="true" />
+              {formatDateDisplay(datetime)}
+            </button>
+          </label>
+
+          <label className="form-label">
+            {"Ghi chú"}
+            <textarea
+              className="form-input form-textarea"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Tùy chọn..."
+              maxLength={300}
+              rows={2}
+            />
+          </label>
+
+          <label className="form-label">
+            {"Lặp lại"}
+            <RepeatSelect value={repeat} onChange={setRepeat} />
+          </label>
+
+          {error && <p className="form-error" role="alert">{error}</p>}
+
+          <div className="form-actions">
+            <button type="button" className="btn-secondary" onClick={onCancel}>
+              {"Hủy"}
+            </button>
+            <button type="submit" className="btn-primary">
+              {isEditing ? "Cập nhật" : "Tạo nhắc nhở"}
+            </button>
+          </div>
+        </motion.form>
+      )}
+    </AnimatePresence>
   );
 };
