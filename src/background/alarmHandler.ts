@@ -25,14 +25,19 @@ const handleAlarm = async (alarm: browser.Alarms.Alarm): Promise<void> => {
   const reminder = await getReminderById(alarm.name);
   if (!reminder) return;
 
-  // Hiện notification với nội dung reminder
-  await browser.notifications.create(reminder.id, {
-    type: "basic",
-    iconUrl: "/icon/128.png",
-    title: reminder.title,
-    message: reminder.note ?? "Glass Reminder",
-    priority: 2,
-  });
+  // Bắn notification — dùng runtime.getURL để đảm bảo icon path hợp lệ
+  // try/catch riêng để lỗi notification không chặn deleteReminder phía dưới
+  try {
+    await browser.notifications.create(reminder.id, {
+      type: "basic",
+      iconUrl: browser.runtime.getURL("icon/128.png"),
+      title: reminder.title,
+      message: reminder.note ?? "Glass Reminder",
+      priority: 2,
+    });
+  } catch (err) {
+    console.error("[Glass Reminder] notifications.create failed:", err);
+  }
 
   // Xử lý repeat: tạo alarm tiếp theo rồi xóa bản ghi cũ
   if (reminder.repeat === "daily") {
