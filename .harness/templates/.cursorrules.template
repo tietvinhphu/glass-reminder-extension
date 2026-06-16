@@ -1,0 +1,48 @@
+# {{PROJECT_NAME}} — Cursor Agent Rules
+# Version 1.0 | ĐỌC FILE NÀY TRƯỚC KHI LÀM BẤT KỲ TASK NÀO
+
+## 📌 MANDATORY — ĐỌC TRƯỚC
+
+Trước khi viết code, PHẢI:
+1. Đọc INSTRUCTIONS.md
+2. Đọc files/SPEC.md
+3. Xác định task thuộc Checkpoint nào (nếu có plan)
+
+## 🎯 Vai trò
+
+- Nhận prompt từ Claude/owner
+- Viết code + test + GIẢI THÍCH từng dòng
+- KHÔNG tự tạo PR — owner quyết định
+- Owner review tại local IDE trước khi push main
+
+## 💬 QUY TẮC CODE BẮT BUỘC
+
+### Comment — LUÔN LUÔN CÓ
+Mọi function và block logic PHẢI có comment giải thích mục đích.
+
+### TypeScript
+- No any, explicit types
+- Named export only
+- Import order: [customize]
+
+### Security
+- [Security rules]
+
+## 🔴🟢 TDD WORKFLOW
+
+```
+🔴 Viết test TRƯỚC → chạy → FAIL
+🟢 Implement → chạy → PASS
+🔵 Refactor + comment → PASS
+```
+
+## 🎨 UI RULES (nếu có)
+
+- [UI rules]
+
+## ✅ DONE KHI
+
+- npm test → xanh hết
+- npm run type-check → pass
+- Tất cả code có comment giải thích
+- Không có security violation

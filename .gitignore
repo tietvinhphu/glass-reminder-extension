@@ -43,3 +43,7 @@ Thumbs.db
 
 # Dependencies
 node_modules/
+
+# Harness Framework: ignore local mistake log files (giữ example + template)
+# Chỉ ignore *.local.json — file example/template vẫn track được
+.harness/mistakes/*.local.json

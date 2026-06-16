@@ -1,0 +1,24 @@
+{
+  "id": "example-2026-06-16-no-vi-comment",
+  "date": "2026-06-16",
+  "category": "code-style",
+  "mistake": {
+    "summary": "Agent tạo function calculateTotal() trong src/utils/pricing.ts mà KHÔNG có comment tiếng Việt giải thích",
+    "context": "Task: implement pricing calculation cho Calendar event. Agent được nhắc viết helper function tính tổng giá có discount",
+    "evidence": "src/utils/pricing.ts:42-58 — function calculateTotal không có comment, chỉ có code logic"
+  },
+  "root_cause": "Không có cơ chế tự động enforce rule 'comment tiếng Việt bắt buộc' — rule chỉ tồn tại trong CLAUDE.md và INSTRUCTIONS.md, bị quên giữa sessions do context rot. Agent không 'nhớ' rule sau khi context bị nén",
+  "harness_fix": {
+    "layer": "L4",
+    "type": "hook",
+    "description": "PostToolUse hook check file .ts/.tsx sau Write/Edit — reject nếu không có comment tiếng Việt trong 10 dòng đầu. Hook sẽ parse CLAUDE_TOOL_INPUT để lấy file_path, head 10 dòng, grep Vietnamese regex",
+    "files_changed": [
+      ".claude/hooks/check-vi-comment.sh",
+      ".claude/settings.json"
+    ]
+  },
+  "prevention": "Hook tự động reject edit nếu thiếu comment tiếng Việt — agent phải thêm comment mới pass. Mỗi lần Write/Edit file .ts/.tsx đều được check, không phụ thuộc vào việc agent 'nhớ' rule",
+  "verified_at": "2026-06-16T14:30:00Z",
+  "verified_by": "manual-test: edit test file thiếu comment → hook reject với exit 2; edit lại với comment → pass",
+  "tags": ["comment", "vietnamese", "code-style", "posttool-hook", "l4"]
+}

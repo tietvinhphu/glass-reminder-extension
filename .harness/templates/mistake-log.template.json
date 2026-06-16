@@ -1,0 +1,21 @@
+{
+  "id": "{{UUID}}",
+  "date": "{{DATE}}",
+  "category": "code-style",
+  "mistake": {
+    "summary": "Mô tả ngắn lỗi agent mắc",
+    "context": "Task nào, file nào, điều kiện gì",
+    "evidence": "Quote từ output hoặc file path:line"
+  },
+  "root_cause": "Tại sao agent sai — thiếu memory, thiếu skill, thiếu guardrail?",
+  "harness_fix": {
+    "layer": "L4",
+    "type": "hook",
+    "description": "Cụ thể sửa gì",
+    "files_changed": [".claude/hooks/example.sh", ".claude/settings.json"]
+  },
+  "prevention": "Cơ chế nào ngăn lỗi lặp lại",
+  "verified_at": null,
+  "verified_by": null,
+  "tags": ["example", "code-style"]
+}
