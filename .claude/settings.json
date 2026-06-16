@@ -22,6 +22,12 @@
             "command": "bash .claude/hooks/check-vi-comment.sh",
             "timeout": 5,
             "statusMessage": "🇻🇳 Checking Vietnamese comments..."
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-memory-index.sh",
+            "timeout": 5,
+            "statusMessage": "🧠 Checking MEMORY.md index sync..."
           }
         ]
       }
