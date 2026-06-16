@@ -139,6 +139,23 @@ Map sang solo workflow — mỗi session, ta luân phiên 3 vai:
 
 Chi tiết: [`.harness/docs/04-multi-agent-patterns.md`](.harness/docs/04-multi-agent-patterns.md)
 
+### 🤖 6 Subagents đề xuất (adapt từ mrgoonie)
+
+Khi bootstrap dự án mới, copy 6 subagent definitions vào `.claude/agents/`:
+
+| Subagent | Model | Tóm tắt |
+|---|---|---|
+| `planner-researcher` | opus | Research + viết plan vào `.harness/plans/YYYYMMDD-feature.md` |
+| `code-reviewer` | inherit | Review code quality, security, SonarQube |
+| `tester` | sonnet | Run tests, coverage, report pass/fail |
+| `debugger` | sonnet | Investigate CI logs, runtime errors, root cause |
+| `docs-manager` | sonnet | Sync code ↔ docs, update landing page |
+| `git-manager` | haiku | Stage + conventional commit + scan secrets |
+
+Templates có sẵn trong [`.harness/templates/agents/`](.harness/templates/agents/) — xem README ở đó.
+
+**3 patterns tổ chức subagent** (Chaining / Parallel / Context Collector) + warning "KHÔNG dùng subagent cho implementation": xem chi tiết trong [`.harness/docs/04-multi-agent-patterns.md`](.harness/docs/04-multi-agent-patterns.md).
+
 ---
 
 ## 🚀 Bootstrap dự án mới
