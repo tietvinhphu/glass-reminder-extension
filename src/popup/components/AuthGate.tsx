@@ -1,7 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 
-import { useAuth } from "@/popup/hooks/useAuth";
-import { LoginScreen } from "@/popup/components/LoginScreen";
+import { useAuth } from "../../popup/hooks/useAuth";
+import { LoginScreen } from "../../popup/components/LoginScreen";
 
 interface AuthGateProps {
   /** Nội dung chính của app — chỉ render khi đã đăng nhập */

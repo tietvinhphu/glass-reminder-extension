@@ -1,4 +1,4 @@
-import type { PKCEPair } from "@/shared/types/auth";
+import type { PKCEPair } from "../../shared/types/auth";
 
 /** Prefix version cho payload mã hóa — giúp migrate format sau này */
 const ENCRYPTED_PAYLOAD_VERSION = "v1";

@@ -1,4 +1,4 @@
-import type { GoogleAuthToken } from "@/shared/types/auth";
+import type { GoogleAuthToken } from "../../shared/types/auth";
 
 /** Message types popup gửi sang background cho OAuth */
 export const AUTH_MESSAGE_TYPE = {

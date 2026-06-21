@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { mergePreservedTokenFields } from "@/background/auth";
-import { buildGoogleAuthURL, isExpiringSoon } from "@/shared/utils/auth";
-import { generatePKCE } from "@/shared/utils/crypto";
-import type { GoogleAuthToken } from "@/shared/types/auth";
+import { mergePreservedTokenFields } from "../../src/background/auth";
+import { buildGoogleAuthURL, isExpiringSoon } from "../../src/shared/utils/auth";
+import { generatePKCE } from "../../src/shared/utils/crypto";
+import type { GoogleAuthToken } from "../../src/shared/types/auth";
 
 /**
  * Chuyển Uint8Array sang base64url (không padding) — dùng để verify PKCE challenge

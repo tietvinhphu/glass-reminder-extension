@@ -1,4 +1,4 @@
-import type { GoogleAuthURLParams } from "@/shared/types/auth";
+import type { GoogleAuthURLParams } from "../../shared/types/auth";
 
 /** Endpoint authorization Google OAuth 2.0 */
 const GOOGLE_AUTH_ENDPOINT =

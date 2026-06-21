@@ -23,6 +23,12 @@ export interface ChromeMock {
     create: Mock;
     clear: Mock;
   };
+  windows: {
+    update: Mock;
+    onRemoved: {
+      addListener: Mock;
+    };
+  };
   identity: {
     launchWebAuthFlow: Mock;
     getRedirectURL: Mock;
@@ -68,6 +74,12 @@ export const createChromeMock = (): ChromeMock => ({
   notifications: {
     create: vi.fn(),
     clear: vi.fn(),
+  },
+  windows: {
+    update: vi.fn().mockResolvedValue(undefined),
+    onRemoved: {
+      addListener: vi.fn(),
+    },
   },
   identity: {
     launchWebAuthFlow: vi.fn(),

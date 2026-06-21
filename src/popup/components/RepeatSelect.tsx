@@ -1,7 +1,7 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ChevronDown, Check } from "lucide-react";
 
-import type { ReminderFormData } from "@/shared/types/reminder";
+import type { ReminderFormData } from "../../shared/types/reminder";
 
 type RepeatValue = ReminderFormData["repeat"];
 

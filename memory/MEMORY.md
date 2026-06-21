@@ -13,3 +13,4 @@
 - [Push Restriction](feedback_push_restriction.md) — Auto mode block push lên main, phải để user push manually
 - [Subagent Patterns](reference_subagent_patterns.md) — 3 patterns tổ chức subagent + 6 subagents adapt từ mrgoonie
 - [Audit Findings 21/06/2026](audit_2026-06-21.md) — Findings từ claude-md-improver audit 21/06: 4 file có drift version, MEMORY.md có entry trỏ tới file ma
+- [WXT/Vite Prepare Gotcha](wxt-vite-prepare-gotcha.md) — `tsc --noEmit` pass KHÔNG đảm bảo `wxt prepare` pass. ViteNodeRunner dùng context riêng. Bắt buộc chạy quality gate script sau config change

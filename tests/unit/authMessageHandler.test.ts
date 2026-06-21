@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AUTH_MESSAGE_TYPE } from "@/shared/types/authMessages";
+import { AUTH_MESSAGE_TYPE } from "../../src/shared/types/authMessages";
 
 const launchGoogleOAuth = vi.fn();
 const logoutGoogle = vi.fn();
 const addListener = vi.fn();
 
-vi.mock("@/background/auth", () => ({
+vi.mock("../../src/background/auth", () => ({
   launchGoogleOAuth,
   logoutGoogle,
 }));
@@ -39,7 +39,7 @@ describe("authMessageHandler", () => {
     });
 
     const { registerAuthMessageHandler } = await import(
-      "@/background/authMessageHandler"
+      "../../src/background/authMessageHandler"
     );
 
     registerAuthMessageHandler();
@@ -72,7 +72,7 @@ describe("authMessageHandler", () => {
     launchGoogleOAuth.mockRejectedValue(new Error("OAuth flow bị hủy"));
 
     const { registerAuthMessageHandler } = await import(
-      "@/background/authMessageHandler"
+      "../../src/background/authMessageHandler"
     );
 
     registerAuthMessageHandler();

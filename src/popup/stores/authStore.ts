@@ -1,10 +1,10 @@
 import browser from "webextension-polyfill";
 import { create } from "zustand";
 
-import { AUTH_MESSAGE_TYPE } from "@/shared/types/authMessages";
-import type { AuthResponse } from "@/shared/types/authMessages";
-import { isExpiringSoon } from "@/shared/utils/auth";
-import { getToken } from "@/shared/utils/tokenStorage";
+import { AUTH_MESSAGE_TYPE } from "../../shared/types/authMessages";
+import type { AuthResponse } from "../../shared/types/authMessages";
+import { isExpiringSoon } from "../../shared/utils/auth";
+import { getToken } from "../../shared/utils/tokenStorage";
 
 /** State và actions của auth trong popup */
 interface AuthState {

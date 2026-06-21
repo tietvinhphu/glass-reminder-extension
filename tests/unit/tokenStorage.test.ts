@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { GoogleAuthToken } from "@/shared/types/auth";
+import type { GoogleAuthToken } from "../../src/shared/types/auth";
 import { chromeMock } from "../mocks/webextension-polyfill";
 
 describe("tokenStorage", () => {
@@ -11,7 +11,7 @@ describe("tokenStorage", () => {
   });
 
   it("storeToken() gọi chrome.storage.local.set (KHÔNG .sync)", async () => {
-    const { storeToken } = await import("@/shared/utils/tokenStorage");
+    const { storeToken } = await import("../../src/shared/utils/tokenStorage");
 
     const token: GoogleAuthToken = {
       accessToken: "access-token-abc",
@@ -31,7 +31,7 @@ describe("tokenStorage", () => {
   it("getToken() → null nếu chưa có", async () => {
     chromeMock.storage.local.get.mockResolvedValue({});
 
-    const { getToken } = await import("@/shared/utils/tokenStorage");
+    const { getToken } = await import("../../src/shared/utils/tokenStorage");
 
     const result = await getToken();
 
@@ -69,7 +69,7 @@ describe("tokenStorage", () => {
     );
 
     const { storeToken, getToken } = await import(
-      "@/shared/utils/tokenStorage"
+      "../../src/shared/utils/tokenStorage"
     );
 
     const token: GoogleAuthToken = {

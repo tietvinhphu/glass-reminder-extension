@@ -3,12 +3,12 @@ import browser from "webextension-polyfill";
 import {
   launchGoogleOAuth,
   logoutGoogle,
-} from "@/background/auth";
+} from "../background/auth";
 import {
   AUTH_MESSAGE_TYPE,
   type AuthMessage,
   type AuthResponse,
-} from "@/shared/types/authMessages";
+} from "../shared/types/authMessages";
 
 /**
  * Xử lý message auth từ popup

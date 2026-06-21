@@ -13,7 +13,7 @@ export default defineConfig({
     permissions: [...REQUIRED_MANIFEST_PERMISSIONS],
     host_permissions: [...REQUIRED_HOST_PERMISSIONS],
   },
-  runner: {
+  webExt: {
     binaries: {
       chrome:
         "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Pencil, X } from "lucide-react";
 
-import type { Reminder } from "@/shared/types/reminder";
+import type { Reminder } from "../../shared/types/reminder";
 
 interface ReminderListProps {
   reminders: Reminder[];

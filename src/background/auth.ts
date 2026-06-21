@@ -4,15 +4,15 @@ import {
   GOOGLE_CALENDAR_SCOPE,
   GOOGLE_TOKEN_ENDPOINT,
   TOKEN_EXPIRY_BUFFER_SECONDS,
-} from "@/shared/constants/api";
-import type { GoogleAuthToken } from "@/shared/types/auth";
-import { buildGoogleAuthURL, isExpiringSoon } from "@/shared/utils/auth";
-import { generatePKCE } from "@/shared/utils/crypto";
+} from "../shared/constants/api";
+import type { GoogleAuthToken } from "../shared/types/auth";
+import { buildGoogleAuthURL, isExpiringSoon } from "../shared/utils/auth";
+import { generatePKCE } from "../shared/utils/crypto";
 import {
   clearToken,
   getToken,
   storeToken,
-} from "@/shared/utils/tokenStorage";
+} from "../shared/utils/tokenStorage";
 
 /** Client ID lấy từ env — không hardcode credentials */
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;

@@ -1,0 +1,25 @@
+{
+  "id": "2026-06-21-assume-config-works",
+  "date": "2026-06-21",
+  "category": "workflow",
+  "mistake": {
+    "summary": "Agent assume config (tsconfig paths, vite-tsconfig-paths plugin) work mà KHÔNG verify bằng `wxt prepare` — dẫn đến 3 vòng lặp sai liên tiếp trước khi user quá mệt mới quyết định chuyển sang relative path",
+    "context": "Task: fix lỗi Edge 'Manifest file is missing' + ViteNodeRunner 'Cannot find module @/shared/...' khi load extension. Agent có 26 file dùng `@/X` alias. Agent giả định: (1) tsconfig paths là đủ — sai; (2) thêm vite-tsconfig-paths plugin — sai vì WXT prepare dùng ViteNodeRunner riêng; (3) đổi sang relative path — đúng nhưng tốn 3 turn sai trước đó. User cuối cùng phải nói 'e quyết định thay anh' vì mệt với loop",
+    "evidence": "3 attempts trước khi đúng:\n  Attempt 1: thêm paths vào tsconfig.json + baseUrl — TS editor pass nhưng `wxt prepare` vẫn fail 'Cannot find module @/shared/...' trong .output/\n  Attempt 2: thêm vite-tsconfig-paths plugin vào wxt.config.ts — `wxt prepare` vẫn fail vì ViteNodeRunner load plugin context riêng, plugin không apply\n  Attempt 3: drop alias hoàn toàn, convert 26 file sang relative path — `wxt prepare` PASS (446ms)\n\nUser feedback verbatim: 'sao em làm cái gì vẫn còn lỗi hoài vậy?' (turn 2), 'e quyết định thay anh' (turn 4)"
+  },
+  "root_cause": "Không có quality gate script: trước khi announce 'fix xong config', agent không chạy lại command thật mà WXT dùng để build. Agent chỉ rely vào TypeScript editor hoặc command khác (`tsc --noEmit`, `npm run dev`) không cover WXT prepare. L7 gap: thiếu hook bắt buộc run `wxt prepare` sau khi sửa tsconfig/wxt.config",
+  "harness_fix": {
+    "layer": "L7",
+    "type": "script",
+    "description": "Tạo .harness/scripts/verify-config-change.sh — quality gate script chạy 4 lệnh theo thứ tự trước khi commit thay đổi config:\n  1. `wxt prepare` — phải exit 0 (bắt buộc cho mọi config change: tsconfig, wxt.config, vite plugin)\n  2. `npm run type-check` — verify TypeScript compile\n  3. `npm run test` — verify Vitest còn pass\n  4. `wxt build` (optional, dry-run) — verify production build không break\nScript này làm COMMAND OF RECORD: nếu bất kỳ step nào fail, agent PHẢI fix trước khi báo 'done' config change. Tham chiếu trong CLAUDE.md dòng 'Thứ tự quality gate'",
+    "files_changed": [
+      ".harness/scripts/verify-config-change.sh",
+      "CLAUDE.md",
+      "memory/wxt-vite-prepare-gotcha.md"
+    ]
+  },
+  "prevention": "Quality gate script chạy được cả local (bash) và pre-commit hook. Agent sẽ có 1 câu lệnh duy nhất `bash .harness/scripts/verify-config-change.sh` để verify thay vì nhớ 4 lệnh riêng. Memory entry `wxt-vite-prepare-gotcha.md` cảnh báo: 'Với WXT/Vite, LUÔN test bằng wxt prepare — không chỉ tsc — vì ViteNodeRunner dùng context riêng'. CLAUDE.md cập nhật thứ tự quality gate rõ ràng",
+  "verified_at": "2026-06-21T13:01:00Z",
+  "verified_by": "manual-test: bash .harness/scripts/verify-config-change.sh — Step 1 wxt prepare PASS (399ms), Step 2 type-check PASS, Step 3 tests PASS (35/35). Bug phụ phát hiện: 22 lỗi TS 2307 tests/unit/ + 5 stale test expectations (manifestPermissions, wxtConfig host_permissions/webExt) + 1 stale test (backgroundEntrypoint mock authMessageHandler thay vì alarmHandler) + ChromeMock thiếu windows.onRemoved — tất cả fix trong cùng session, xem git diff để review",
+  "tags": ["wxt", "vite", "config", "quality-gate", "l7", "mistake-loop", "context-window-loss"]
+}

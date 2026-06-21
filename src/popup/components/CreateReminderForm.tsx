@@ -2,7 +2,7 @@ import { useState, type SyntheticEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Calendar as CalendarIcon } from "lucide-react";
 
-import type { Reminder, ReminderFormData } from "@/shared/types/reminder";
+import type { Reminder, ReminderFormData } from "../../shared/types/reminder";
 import { CalendarPicker } from "./CalendarPicker";
 import { RepeatSelect } from "./RepeatSelect";
 

@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/popup/stores/authStore";
+import { useAuthStore } from "../../popup/stores/authStore";
 
 /**
  * Hook wrapper cho authStore

@@ -4,7 +4,7 @@ import {
   FORBIDDEN_MANIFEST_PERMISSIONS,
   REQUIRED_HOST_PERMISSIONS,
   REQUIRED_MANIFEST_PERMISSIONS,
-} from "@/shared/constants/manifest";
+} from "../../src/shared/constants/manifest";
 import wxtConfig from "../../wxt.config";
 import { isOverlyBroadMatchPattern } from "../utils/matchPatterns";
 import { isHttpsOnlyHostPermission } from "../utils/matchPatterns";
@@ -28,7 +28,10 @@ describe("wxt.config", () => {
   });
 
   it("configures Edge as the primary development browser", () => {
-    expect(wxtConfig.runner?.binaries?.chrome).toContain("msedge.exe");
+    // WXT 0.20+ đổi `runner` → `webExt` (deprecation warning cũ).
+    const binaries = (wxtConfig as { webExt?: { binaries?: { chrome?: string } } })
+      .webExt?.binaries;
+    expect(binaries?.chrome).toContain("msedge.exe");
   });
 
   it("does not request store-risky broad permissions in manifest", () => {

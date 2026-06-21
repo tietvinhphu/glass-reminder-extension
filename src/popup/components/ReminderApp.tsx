@@ -3,9 +3,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Bell, Plus, Settings } from "lucide-react";
 import browser from "webextension-polyfill";
 
-import type { Reminder, ReminderFormData } from "@/shared/types/reminder";
-import { getReminders, addReminder, deleteReminder, updateReminder } from "@/shared/utils/reminderStorage";
-import { scheduleAlarm, cancelAlarm } from "@/background/alarmHandler";
+import type { Reminder, ReminderFormData } from "../../shared/types/reminder";
+import { getReminders, addReminder, deleteReminder, updateReminder } from "../../shared/utils/reminderStorage";
+import { scheduleAlarm, cancelAlarm } from "../../background/alarmHandler";
 import { CreateReminderForm } from "./CreateReminderForm";
 import { ReminderList } from "./ReminderList";
 import { GlassFilter } from "./GlassFilter";
