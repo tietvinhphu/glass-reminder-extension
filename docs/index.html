@@ -14,7 +14,14 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://tietvinhphu.github.io/glass-reminder-extension/" />
 
-  <link rel="icon" type="image/png" href="../public/icon/128.png" />
+  <link rel="icon" type="image/png" href="icon-128.png" />
+
+  <!-- Google Fonts — dùng Inter (Sans) + Lora (Serif) làm proxies cho Anthropic Serif/Sans
+       Lý do: Anthropic Serif/Sans chưa public. Inter + Lora là lựa chọn phổ biến thay thế,
+       hỗ trợ đầy đủ Latin Extended (tiếng Việt có dấu), line-height thấp hơn Georgia. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,500;1,500&display=swap" rel="stylesheet" />
 
   <style>
     /* ====================================================
@@ -71,9 +78,10 @@
       --shadow-3: 0px 4px 8px rgba(20, 20, 19, 0.12);
       --shadow-4: 0px 8px 16px rgba(20, 20, 19, 0.15);
 
-      /* Typography */
-      --font-serif: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
-      --font-sans:  'Anthropic Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      /* Typography — Anthropic Serif/Sans chưa public, dùng Lora + Inter làm proxy.
+         Cả 2 đều load từ Google Fonts ở <head>, hỗ trợ tiếng Việt có dấu. */
+      --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
+      --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
       --font-mono:  ui-monospace, 'Courier New', monospace;
     }
 
@@ -212,7 +220,7 @@
       color: var(--dark-gray);
       text-align: center;
       max-width: 600px;
-      margin: -16px auto var(--space-10);
+      margin: 0 auto var(--space-10);
     }
 
     /* ─────────────── FEATURE CARDS ─────────────── */
@@ -380,7 +388,7 @@
 <!-- ═══════════════ NAV ═══════════════ -->
 <nav class="nav">
   <a class="nav-brand" href="/">
-    <img class="nav-brand-icon" src="../public/icon/128.png" alt="Glass Reminder" />
+    <img class="nav-brand-icon" src="icon-128.png" alt="Glass Reminder" />
     Glass Reminder
   </a>
   <div class="nav-links">

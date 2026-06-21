@@ -47,3 +47,20 @@ node_modules/
 # Harness Framework: ignore local mistake log files (giữ example + template)
 # Chỉ ignore *.local.json — file example/template vẫn track được
 .harness/mistakes/*.local.json
+
+# ============================================================
+# TEMP ARTIFACTS — Debug tools output, không commit lên GitHub
+# ============================================================
+
+# Jimp MCP resize output (timestamps UUID-based)
+jimp-resize-*.png
+jimp-resize-*.jpg
+
+# Playwright MCP screenshot output
+playwright-fullpage-*.png
+playwright-viewport-*.png
+playwright-element-*.png
+
+# Eyes MCP analysis output
+eyes-analyze-*.png
+eyes-compare-*.png
