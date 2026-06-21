@@ -14,7 +14,7 @@ describe("wxt.config", () => {
     expect(wxtConfig.manifest).toMatchObject({
       name: "Glass Reminder Extension",
       description: "Glass Calendar & Smart Reminder Extension",
-      version: "1.0.0",
+      version: "2.0.0",
     });
   });
 

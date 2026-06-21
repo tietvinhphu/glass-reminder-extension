@@ -1,8 +1,8 @@
 {
-  "name": "wxt-react-starter",
-  "description": "manifest.json description",
+  "name": "glass-reminder-extension",
+  "description": "Glass Calendar & Smart Reminder Extension for Microsoft Edge, Chrome, Firefox",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
