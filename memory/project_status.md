@@ -9,7 +9,7 @@ metadata:
 
 Browser extension Microsoft Edge — Glass Calendar UI + Google Calendar sync + Smart reminders.
 
-**Stack:** WXT + React 19 + TypeScript + Tailwind CSS v4 | Auth: Google OAuth 2.0 PKCE | Storage: AES-GCM encrypted tokens
+**Stack:** WXT + React 19 + TypeScript + CSS Modules | Auth: Google OAuth 2.0 PKCE | Storage: AES-GCM encrypted tokens
 
 **Đã hoàn thành (tính đến 2026-06-16):**
 - Checkpoint 1-2: Google OAuth 2.0 PKCE flow hoàn chỉnh (PR #11 merged)

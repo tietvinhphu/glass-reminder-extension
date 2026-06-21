@@ -1,5 +1,5 @@
 # Glass Reminder Extension — Project Instructions
-> Version 2.0 | Cập nhật: 2026-06-12 | Solo Founder Project
+> Version 2.1 | Cập nhật: 2026-06-21 | Solo Founder Project
 
 ---
 
@@ -13,9 +13,9 @@ Browser extension **primary target: Microsoft Edge** (secondary: Chrome, Firefox
 
 **Key fact:** Edge là Chromium-based → cùng MV3 với Chrome → 1 codebase chạy cả Edge + Chrome.
 
-**Stack:** WXT + React 18 + TypeScript + Tailwind CSS v4  
+**Stack:** WXT + React 19 + TypeScript + CSS Modules (App.css / style.css)  
 **Auth:** OAuth 2.0 PKCE (Google)  
-**Storage:** chrome.storage.sync (events) + chrome.storage.local (tokens encrypted)  
+**Storage:** chrome.storage.local (reminders + tokens encrypted)  
 **Deploy:** Microsoft Edge Add-ons Store → Chrome Web Store → Firefox Add-ons
 
 ---
@@ -335,4 +335,4 @@ Trước khi `git push origin main`, tự kiểm tra **theo thứ tự**:
 
 ---
 
-*Version 2.0 | 2026-06-12*
+*Version 2.1 | 2026-06-21*

@@ -2,7 +2,7 @@
 > Glass Calendar & Smart Reminder Extension  
 > **Primary target: Microsoft Edge** | Secondary: Chrome, Firefox  
 > Author: Solo Founder | Stack: WXT + React + TypeScript  
-> Version: 1.0.0 | Date: 2026-06-11
+> Version: 1.1.0 | Date: 2026-06-21
 
 ---
 
@@ -72,12 +72,12 @@ Event sync strategy:
 ┌─────────────────────────────────────────────────┐
 │              BROWSER EXTENSION                   │
 ├─────────────────────────────────────────────────┤
-│  Framework:    WXT (v0.19+)                     │
+│  Framework:    WXT (v0.20+)                     │
 │  Language:     TypeScript 5.x                   │
-│  UI:           React 18 + Tailwind CSS v4       │
-│  Animation:    Framer Motion 11 (light mode)    │
+│  UI:           React 19 + CSS Modules           │
+│  Animation:    Framer Motion 12 (light mode)    │
 │  Icons:        Lucide React                     │
-│  Date lib:     date-fns v3                      │
+│  Date lib:     date-fns v4                      │
 │  HTTP:         axios (typed interceptors)       │
 │  State:        Zustand (lightweight)            │
 │  Form:         React Hook Form + Zod            │
@@ -342,6 +342,11 @@ Mono:     JetBrains Mono 12px — date numbers trong calendar grid
 ---
 
 ## 6. Cấu trúc thư mục dự án
+
+> ⚠ **Cập nhật 2026-06-21:** Directory tree dưới đây là **TARGET structure** (mục tiêu cuối cùng).  
+> Codebase hiện tại đã có: `entrypoints/{alarm,popup}/`, `src/{alarm,background,popup,shared}/`, `tests/{unit,mocks,setup}/`, `tests/utils/`.  
+> **CHƯA có:** `src/options/`, `src/offscreen/`, `tailwind.config.ts`, `.eslintrc.json`, `.prettierrc`, `tests/e2e/`.  
+> Khi thêm mới, cập nhật lại section này cho khớp thực tế.
 
 ```
 glass-reminder-extension/

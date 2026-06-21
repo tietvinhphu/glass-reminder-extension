@@ -22,4 +22,8 @@ Skills được lưu trong `.agents/skills/` (committed vào GitHub, không cầ
 - `brainstorming` — design trước khi implement
 - `requesting-code-review` — trước khi merge PR
 
+**Custom harness skills (in-repo):**
+- `harness-bootstrap` — tạo dự án mới từ Harness Framework templates
+- `harness-mistake-log` — log mistake agent mắc phải + engineer fix ở 1 trong 7 layers
+
 **Nếu cần cài thêm:** `npx skills find <query> --yes` (chạy từ C:\ path, không phải UNC path)
