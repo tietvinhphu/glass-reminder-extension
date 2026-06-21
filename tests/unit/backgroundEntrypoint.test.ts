@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const registerAuthMessageHandler = vi.fn();
 
-vi.mock("@/src/background/authMessageHandler", () => ({
+vi.mock("@/background/authMessageHandler", () => ({
   registerAuthMessageHandler,
 }));
 

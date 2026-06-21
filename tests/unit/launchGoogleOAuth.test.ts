@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { GoogleAuthToken } from "@/src/shared/types/auth";
+import type { GoogleAuthToken } from "@/shared/types/auth";
 
 const getToken = vi.fn();
 const storeToken = vi.fn();
 const launchWebAuthFlow = vi.fn();
 const getRedirectURL = vi.fn();
 
-vi.mock("@/src/shared/utils/tokenStorage", () => ({
+vi.mock("@/shared/utils/tokenStorage", () => ({
   getToken,
   storeToken,
   clearToken: vi.fn(),
@@ -50,7 +50,7 @@ describe("launchGoogleOAuth", () => {
     getToken.mockRejectedValue(new Error("Định dạng token mã hóa không hợp lệ"));
     storeToken.mockResolvedValue(undefined);
 
-    const { launchGoogleOAuth } = await import("@/src/background/auth");
+    const { launchGoogleOAuth } = await import("@/background/auth");
     const token = await launchGoogleOAuth();
 
     expect(launchWebAuthFlow).toHaveBeenCalledOnce();

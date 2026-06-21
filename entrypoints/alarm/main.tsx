@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import { AlarmOverlay } from "@/src/alarm/AlarmOverlay";
-import "@/src/alarm/alarm.css";
+import { AlarmOverlay } from "@/alarm/AlarmOverlay";
+import "@/alarm/alarm.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

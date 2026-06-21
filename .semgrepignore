@@ -1,0 +1,6 @@
+# Local agent tooling and test fixtures are not extension production code.
+.agents/
+.claude/
+.harness/
+tests/
+docs/

@@ -1,7 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 
-import { useAuth } from "@/src/popup/hooks/useAuth";
-import { LoginScreen } from "@/src/popup/components/LoginScreen";
+import { useAuth } from "@/popup/hooks/useAuth";
+import { LoginScreen } from "@/popup/components/LoginScreen";
 
 interface AuthGateProps {
   /** Nội dung chính của app — chỉ render khi đã đăng nhập */
@@ -23,7 +23,7 @@ export const AuthGate = ({ children }: Readonly<AuthGateProps>) => {
   if (isLoading) {
     return (
       <div className="auth-gate-loading" aria-live="polite">
-        Đang kiểm tra đăng nhập...
+        {"Đang kiểm tra đăng nhập..."}
       </div>
     );
   }

@@ -4,7 +4,7 @@ import {
   FORBIDDEN_MANIFEST_PERMISSIONS,
   REQUIRED_HOST_PERMISSIONS,
   REQUIRED_MANIFEST_PERMISSIONS,
-} from "@/src/shared/constants/manifest";
+} from "@/shared/constants/manifest";
 import wxtConfig from "../../wxt.config";
 import { isOverlyBroadMatchPattern } from "../utils/matchPatterns";
 import { isHttpsOnlyHostPermission } from "../utils/matchPatterns";

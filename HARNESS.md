@@ -45,7 +45,18 @@ Mỗi layer map sang 1 file/thư mục cụ thể trong repo. Khi agent sai, ta 
 | **L4** | Hooks | `.claude/settings.json` | "Model muốn làm gì vs system cho phép làm gì" |
 | **L5** | State | `.harness/mistakes/*.json` | JSON > Markdown (model ít tự sửa JSON hơn) |
 | **L6** | Workflows | `.harness/scripts/` | DAG enforcement, không được skip bước |
-| **L7** | Quality Gates | SonarQube + Vitest + ESLint | 4 ACI components: search 50 / view 100 / linter / compress |
+| **L7** | Quality Gates | SonarQube + Vitest + ESLint + Snyk | 4 ACI components: search 50 / view 100 / linter / compress |
+
+### L4/L7 — Hooks Quality Gates mới (2026-06-21)
+
+| Hook | Trigger | Vai trò | Reference mistake |
+|---|---|---|---|
+| `harness-health.sh` | SessionStart | Health check tổng thể | — |
+| `check-vi-comment.sh` | PostToolUse (Write/Edit) | Reject code TS/TSX thiếu comment tiếng Việt | `2026-06-16-no-vi-comment.example.json` |
+| `check-memory-index.sh` | PostToolUse (Write/Edit) | Reject memory file mới chưa có trong MEMORY.md index | `2026-06-16-stale-memory-index.json` |
+| `check-skill-drift.sh` | PostToolUse (Write/Edit) | **Warn** khi `.agents/skills/*` drift so với `.claude/skills/*` mirror | `2026-06-21-skill-file-drift.json` |
+| `summarize-mistakes.sh` | PreCompact | Snapshot mistake log trước khi context bị nén | — |
+| `sync-memory.sh` | Stop | Tự động commit + push memory/ lên GitHub | — |
 
 Chi tiết từng layer xem [`.harness/docs/02-seven-layers.md`](.harness/docs/02-seven-layers.md).
 

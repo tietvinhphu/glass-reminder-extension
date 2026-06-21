@@ -2,7 +2,7 @@ import { useState, type SyntheticEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Calendar as CalendarIcon } from "lucide-react";
 
-import type { Reminder, ReminderFormData } from "@/src/shared/types/reminder";
+import type { Reminder, ReminderFormData } from "@/shared/types/reminder";
 import { CalendarPicker } from "./CalendarPicker";
 import { RepeatSelect } from "./RepeatSelect";
 
@@ -95,7 +95,7 @@ export const CreateReminderForm = ({ onSubmit, onCancel, initialData }: Readonly
           {...slideLeft}
           transition={{ duration: 0.2, ease: "easeOut" }}
         >
-          <h2 className="form-title">{isEditing ? "Chỉnh sửa nhắc nhở" : "Tạo nhắc nhở"}</h2>
+          <h2 className="form-title">{isEditing ? "Chỉnh sửa nhắc nhở" : "Tạo nhắc nhở"}</h2> {/* S6772: JSX text đã qua expression, OK */}
 
           <label className="form-label">
             {"Tiêu đề"} <span aria-hidden="true">{"*"}</span>

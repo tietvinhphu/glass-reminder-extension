@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill";
 
-import type { Reminder, ReminderFormData } from "@/src/shared/types/reminder";
+import type { Reminder, ReminderFormData } from "@/shared/types/reminder";
 
 const STORAGE_KEY = "reminders";
 

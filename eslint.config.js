@@ -32,6 +32,14 @@ export default [
     }
   },
   {
-    ignores: [".output/", ".wxt/", "node_modules/", "dist/"]
+    ignores: [
+      ".agents/**",
+      ".claude/**",
+      ".harness/**",
+      ".output/**",
+      ".wxt/**",
+      "node_modules/**",
+      "dist/**",
+    ],
   }
 ];

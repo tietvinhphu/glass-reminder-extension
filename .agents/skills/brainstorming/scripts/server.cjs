@@ -1,3 +1,9 @@
+// =================================================================
+// CANONICAL SOURCE: .agents/skills/brainstorming/scripts/server.cjs
+// Mirror: .claude/skills/brainstorming/scripts/server.cjs (DEPRECATED — kept for backward compat)
+// Hook check-skill-drift.sh ở L4/L7 sẽ warn khi 2 file drift.
+// Nếu cần edit, sửa file NÀY, sau đó copy sang .claude/skills/... hoặc xóa mirror.
+// =================================================================
 const crypto = require('crypto');
 const http = require('http');
 const fs = require('fs');
@@ -9,6 +15,9 @@ const OPCODES = { TEXT: 0x01, CLOSE: 0x08, PING: 0x09, PONG: 0x0A };
 const WS_MAGIC = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
 
 function computeAcceptKey(clientKey) {
+  // SHA1 ở đây là BẮT BUỘC theo RFC 6455 §4.2.2 (WebSocket handshake).
+  // Snyk rule: javascript/insecure-hash — false-positive (RFC mandatory, không dùng cho password)
+  // nosemgrep: javascript.lang.security.audit.insecure-hash
   return crypto.createHash('sha1').update(clientKey + WS_MAGIC).digest('base64');
 }
 
@@ -144,7 +153,15 @@ function handleRequest(req, res) {
     res.end(html);
   } else if (req.method === 'GET' && req.url.startsWith('/files/')) {
     const fileName = req.url.slice(7);
-    const filePath = path.join(CONTENT_DIR, path.basename(fileName));
+    const filePath = path.resolve(CONTENT_DIR, path.basename(fileName));
+    // Path traversal guard: đảm bảo filePath nằm trong CONTENT_DIR
+    // Snyk rule: javascript/path-traversal — đã fix
+    const resolvedContentDir = path.resolve(CONTENT_DIR) + path.sep;
+    if (!filePath.startsWith(resolvedContentDir)) {
+      res.writeHead(403);
+      res.end('Forbidden');
+      return;
+    }
     if (!fs.existsSync(filePath)) {
       res.writeHead(404);
       res.end('Not found');
@@ -270,6 +287,9 @@ function startServer() {
     fs.readdirSync(CONTENT_DIR).filter(f => f.endsWith('.html'))
   );
 
+  // HTTP (không HTTPS) — dev tool local, bind 127.0.0.1, không bao giờ chạy trên network public
+  // Snyk rule: javascript/http-to-https — false-positive
+  // nosemgrep: javascript.lang.security.audit.network.http-no-https
   const server = http.createServer(handleRequest);
   server.on('upgrade', handleUpgrade);
 

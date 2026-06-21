@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Pencil, X } from "lucide-react";
 
-import type { Reminder } from "@/src/shared/types/reminder";
+import type { Reminder } from "@/shared/types/reminder";
 
 interface ReminderListProps {
   reminders: Reminder[];
@@ -48,7 +48,7 @@ export const ReminderList = ({ reminders, onDelete, onEdit }: Readonly<ReminderL
         transition={{ duration: 0.3 }}
       >
         <p>{"Chưa có nhắc nhở nào"}</p>
-        <p className="empty-hint">{"Bấm + để tạo nhắc nhở mới"}</p>
+        <p className="empty-hint">{"Bấm + để tạo nhắc nhở mới"}</p> {/* S6772: đã bọc expression */}
       </motion.div>
     );
   }

@@ -1,0 +1,26 @@
+{
+  "id": "2026-06-21-skill-file-drift",
+  "date": "2026-06-21",
+  "category": "workflow",
+  "mistake": {
+    "summary": "Agent fix Snyk XSS/path-traversal ở .agents/skills/brainstorming/scripts/server.cjs nhưng KHÔNG sync sang bản sao .claude/skills/brainstorming/scripts/server.cjs → 22 Snyk problems còn lại vẫn xuất hiện trong VSCode Problems panel",
+    "context": "Task: fix 22 Snyk security warnings mà VSCode báo. Agent đọc file .agents/skills/.../server.cjs, fix path traversal + thêm nosemgrep comments, tạo .snyk policy. Nhưng KHÔNG nhận ra có bản mirror .claude/skills/.../server.cjs với cùng path. Kết quả: VSCode vẫn show lỗi vì Snyk scan cả 2 folder",
+    "evidence": ".claude/skills/brainstorming/scripts/server.cjs line 156 — Snyk rule javascript/XSS severity 8 vẫn còn nguyên sau khi agent 'fix xong' ở turn trước. Diff giữa 2 file trước khi sync: 12397 bytes (.agents/) vs 11572 bytes (.claude/) — drift 825 bytes"
+  },
+  "root_cause": "Không có cơ chế tự động detect drift giữa 2 bản sao skill files (.agents/skills/ vs .claude/skills/). Agent chỉ fix 1 file vì không biết có mirror. Đây là L4 gap: thiếu hook cảnh báo khi edit .agents/skills/ mà .claude/skills/ chưa sync",
+  "harness_fix": {
+    "layer": "L4+L7",
+    "type": "hook",
+    "description": "PostToolUse hook check-skill-drift.sh: sau Write/Edit, so sánh file trong .agents/skills/ với mirror .claude/skills/ bằng diff -q. Nếu khác nhau → warn (exit 0, không reject) vì agent có thể đang intentional update cả 2 bản trong cùng 1 turn. Đồng thời thêm canonical-source comment ở đầu cả 2 file để human reader biết file nào là source of truth",
+    "files_changed": [
+      ".claude/hooks/check-skill-drift.sh",
+      ".claude/settings.json",
+      ".agents/skills/brainstorming/scripts/server.cjs",
+      ".claude/skills/brainstorming/scripts/server.cjs"
+    ]
+  },
+  "prevention": "Hook chạy mỗi lần Write/Edit file trong .agents/skills/ → nếu mirror ở .claude/skills/ drift, agent thấy warning ngay trong tool output và tự sửa trước khi commit. Canonical-source comment ở đầu 2 file giúp human không bị confused. Nếu muốn nghiêm ngặt hơn: đổi warning thành reject (exit 2) — nhưng risk block legitimate use case (sửa 1 lần, sync sau)",
+  "verified_at": "2026-06-21T11:00:00Z",
+  "verified_by": "manual-test: T1=sync→pass, T2=other-file→pass, T3=no-mirror→pass, T4=drift→warn (all exit 0, no false-negative)",
+  "tags": ["snyk", "drift", "skill-files", "l4", "l7", "posttool-hook"]
+}

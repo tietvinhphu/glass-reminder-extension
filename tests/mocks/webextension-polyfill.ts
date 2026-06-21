@@ -11,6 +11,7 @@ export const chromeMock: ChromeMock = getChromeMock();
 const browser = {
   ...chromeMock,
   runtime: {
+    // nosemgrep: generic-api-key — test fixture, không phải secret thật
     id: "test-extension-id",
     getURL: vi.fn(
       (path: string) => `chrome-extension://test-extension-id${path}`,

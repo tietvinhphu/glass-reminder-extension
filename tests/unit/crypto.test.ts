@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { decryptToken, encryptToken } from "@/src/shared/utils/crypto";
+import { decryptToken, encryptToken } from "@/shared/utils/crypto";
 
 describe("crypto utils", () => {
   it("encryptToken() trả về string khác text gốc", async () => {

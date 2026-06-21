@@ -28,6 +28,12 @@
             "command": "bash .claude/hooks/check-memory-index.sh",
             "timeout": 5,
             "statusMessage": "🧠 Checking MEMORY.md index sync..."
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-skill-drift.sh",
+            "timeout": 5,
+            "statusMessage": "🔄 Checking skill file drift (.agents/ vs .claude/)..."
           }
         ]
       }

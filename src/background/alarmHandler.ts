@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill";
 
-import { getReminderById, deleteReminder, addReminder } from "@/src/shared/utils/reminderStorage";
+import { getReminderById, deleteReminder, addReminder } from "@/shared/utils/reminderStorage";
 
 /** Key lưu pending alarm data trong storage */
 const pendingKey = (id: string) => `alarm:pending:${id}`;

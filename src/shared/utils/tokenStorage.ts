@@ -1,7 +1,7 @@
 import browser from "webextension-polyfill";
 
-import type { GoogleAuthToken } from "@/src/shared/types/auth";
-import { decryptToken, encryptToken } from "@/src/shared/utils/crypto";
+import type { GoogleAuthToken } from "@/shared/types/auth";
+import { decryptToken, encryptToken } from "@/shared/utils/crypto";
 
 /** Key lưu token trong chrome.storage.local — KHÔNG dùng sync vì token nhạy cảm */
 const GOOGLE_TOKEN_STORAGE_KEY = "googleToken";

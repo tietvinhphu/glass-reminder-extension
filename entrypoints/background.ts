@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill";
 
-import { registerAlarmHandler, handleAlarmConfirmed } from "@/src/background/alarmHandler";
+import { registerAlarmHandler, handleAlarmConfirmed } from "@/background/alarmHandler";
 
 // Nhận messages từ overlay window (ALARM_CONFIRMED + RESIZE_WINDOW)
 browser.runtime.onMessage.addListener((message: unknown) => {

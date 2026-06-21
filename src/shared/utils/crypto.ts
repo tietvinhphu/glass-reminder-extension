@@ -1,16 +1,13 @@
-import type { PKCEPair } from "@/src/shared/types/auth";
+import type { PKCEPair } from "@/shared/types/auth";
 
 /** Prefix version cho payload mã hóa — giúp migrate format sau này */
 const ENCRYPTED_PAYLOAD_VERSION = "v1";
-
-/** Độ dài IV (nonce) chuẩn AES-GCM — 12 byte */
-const GCM_IV_LENGTH_BYTES = 12;
 
 /** Salt dùng derive key — cố định trong extension, không chứa secret user */
 const KEY_DERIVATION_SALT = "glass-reminder-extension-token-salt";
 
 /**
- * Chuyển Uint8Array sang chuỗi base64url (RFC 4648, không padding)
+ * Chuyển Uint8Array sang chuỗi Base64 an toàn cho URL (RFC 4648, không padding)
  * Dùng cho PKCE code_challenge và payload mã hóa
  */
 const toBase64Url = (bytes: Uint8Array): string => {
@@ -95,11 +92,10 @@ export const generatePKCE = async (): Promise<PKCEPair> => {
  */
 export const encryptToken = async (plainText: string): Promise<string> => {
   const key = await getKeyMaterial();
-  const iv = new Uint8Array(GCM_IV_LENGTH_BYTES);
-  crypto.getRandomValues(iv);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
 
   const cipherBuffer = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv: iv },
+    { name: "AES-GCM", iv },
     key,
     new TextEncoder().encode(plainText),
   );

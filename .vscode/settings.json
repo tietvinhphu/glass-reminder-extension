@@ -1,6 +1,7 @@
 {
     "snyk.advanced.organization": "506e88fb-d51f-4350-8e0b-b2abf631eaf8",
     "snyk.advanced.autoSelectOrganization": true,
+    "snyk.features.infrastructureAsCode": false,
     "sonarlint.connectedMode.project": {
         "connectionId": "tietvinhphu",
         "projectKey": "tietvinhphu_glass-reminder-extension"

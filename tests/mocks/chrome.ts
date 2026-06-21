@@ -74,6 +74,7 @@ export const createChromeMock = (): ChromeMock => ({
     getRedirectURL: vi.fn(),
   },
   runtime: {
+    // nosemgrep: generic-api-key — test fixture, không phải secret thật
     id: "test-extension-id",
     onMessage: {
       addListener: vi.fn(),

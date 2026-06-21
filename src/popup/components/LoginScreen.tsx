@@ -1,6 +1,6 @@
 import { LogIn } from "lucide-react";
 
-import { useAuth } from "@/src/popup/hooks/useAuth";
+import { useAuth } from "@/popup/hooks/useAuth";
 
 /**
  * Màn hình đăng nhập — glass style, nút Sign in with Google

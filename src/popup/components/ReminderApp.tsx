@@ -3,9 +3,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Bell, Plus, Settings } from "lucide-react";
 import browser from "webextension-polyfill";
 
-import type { Reminder, ReminderFormData } from "@/src/shared/types/reminder";
-import { getReminders, addReminder, deleteReminder, updateReminder } from "@/src/shared/utils/reminderStorage";
-import { scheduleAlarm, cancelAlarm } from "@/src/background/alarmHandler";
+import type { Reminder, ReminderFormData } from "@/shared/types/reminder";
+import { getReminders, addReminder, deleteReminder, updateReminder } from "@/shared/utils/reminderStorage";
+import { scheduleAlarm, cancelAlarm } from "@/background/alarmHandler";
 import { CreateReminderForm } from "./CreateReminderForm";
 import { ReminderList } from "./ReminderList";
 import { GlassFilter } from "./GlassFilter";
@@ -71,7 +71,7 @@ export const ReminderApp = () => {
   if (isLoading) {
     return (
       <div className="reminder-app">
-        <div className="app-loading">{"Đang tải..."}</div>
+        <div className="app-loading">{"Đang tải..."}</div> {/* S6772: đã bọc expression */}
       </div>
     );
   }
